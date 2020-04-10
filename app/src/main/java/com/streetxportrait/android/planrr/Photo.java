@@ -12,6 +12,10 @@ public class Photo {
         this.uri = uri;
     }
 
+    public void setUri(Uri uri) {
+        this.uri = uri;
+    }
+
     public Uri getUri() {
         return uri;
     }
