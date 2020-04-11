@@ -2,7 +2,9 @@ package com.streetxportrait.android.planrr;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -11,10 +13,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 
 
 /**
@@ -46,21 +51,42 @@ public class EditFragment extends Fragment {
     }
 
     private void openGallery() {
-        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        Intent gallery = new Intent(Intent.ACTION_PICK);
+        gallery.setDataAndType(MediaStore.Images.Media.INTERNAL_CONTENT_URI, "image/");
         startActivityForResult(gallery, PICK_IMAGE);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE){
+        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE && data != null){
             Uri uri = data.getData();
+            Post photo = new Post(uri);
 
-            Picasso.get()
-                    .load(uri)
-                    .transform(new WhiteBorderTransformation())
-                    .into(imageView);
+            try {
+                Bitmap originalBitmap = photo.createBitmap(getContext());
+                Bitmap finalBitmap = photo.getBitmapWithBorder();
+
+
+                Glide.with(this)
+                        .load(originalBitmap)
+                        .centerInside()
+                        .into(imageView);
+
+                imageView.setOnClickListener(v -> {
+                    if (floatingActionButton.isOrWillBeShown()) {
+                        floatingActionButton.hide();
+                    }
+                    else {
+                        floatingActionButton.show();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 }
