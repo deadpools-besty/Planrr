@@ -19,9 +19,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 
 
 public class GridFragment extends Fragment {
@@ -104,8 +101,8 @@ public class GridFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE){
-            Photo photo = new Photo(data.getData());
-            photoList.addPhoto(photo);
+            Post post = new Post(data.getData());
+            photoList.addPhoto(post);
 
             adapter.notifyDataSetChanged();
             savePhotos();

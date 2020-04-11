@@ -5,40 +5,40 @@ import java.util.Collections;
 
 public class PhotoList {
 
-    private ArrayList<Photo> mPhotos;
+    private ArrayList<Post> mPosts;
 
 
     public PhotoList() {
-        mPhotos = new ArrayList<>();
+        mPosts = new ArrayList<>();
     }
 
-    public ArrayList<Photo> getPhotos() {
-        return mPhotos;
+    public ArrayList<Post> getPhotos() {
+        return mPosts;
     }
 
-    public Photo getPhoto(int i) {
-        return mPhotos.get(i);
+    public Post getPhoto(int i) {
+        return mPosts.get(i);
     }
 
     public int getSize() {
-        return mPhotos.size();
+        return mPosts.size();
     }
 
-    public void addPhoto(Photo photo) {
-        mPhotos.add(0, photo);
+    public void addPhoto(Post post) {
+        mPosts.add(0, post);
     }
 
-    public void removePhoto(Photo photo) {
-        mPhotos.remove(photo);
+    public void removePhoto(Post post) {
+        mPosts.remove(post);
     }
 
     public void removePhoto(int index) {
-        mPhotos.remove(index);
+        mPosts.remove(index);
     }
 
     public void swapPhotos(int firstPhoto, int secondPhoto) {
 
-        Collections.swap(mPhotos, firstPhoto, secondPhoto);
+        Collections.swap(mPosts, firstPhoto, secondPhoto);
 
     }
 

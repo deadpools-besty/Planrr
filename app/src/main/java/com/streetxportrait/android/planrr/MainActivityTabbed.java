@@ -1,5 +1,8 @@
 package com.streetxportrait.android.planrr;
 
+import android.content.SharedPreferences;
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,11 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
@@ -53,10 +51,10 @@ public class MainActivityTabbed extends AppCompatActivity {
         viewPagerAdapter.addFragment(gridFragment, "Grid");
         viewPagerAdapter.addFragment(editFragment, "Edit");
         viewPager.setAdapter(viewPagerAdapter);
-/*
+
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_grid_on_black_24dp);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_edit_black_24dp);
-*/
+
     }
 
     private void getPhotos() {

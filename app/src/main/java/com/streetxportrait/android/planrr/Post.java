@@ -5,12 +5,12 @@ import android.net.Uri;
 
 import java.io.Serializable;
 
-public class Photo implements Serializable {
+public class Post implements Serializable {
 
     private String uri;
     private Bitmap bitmap;
 
-    public Photo(Uri uri) {
+    public Post(Uri uri) {
         this.uri = uri.toString();
     }
 

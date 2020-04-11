@@ -1,22 +1,15 @@
 package com.streetxportrait.android.planrr;
 
 import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
 import com.theophrast.ui.widget.SquareImageView;
-
-import jp.co.cyberagent.android.gpuimage.GPUImage;
-import jp.co.cyberagent.android.gpuimage.GPUImageView;
 
 public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.PhotoListViewHolder> {
 
@@ -50,12 +43,12 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
     @Override
     public void onBindViewHolder(@NonNull PhotoListAdapter.PhotoListViewHolder holder, int position) {
 
-        Photo photo = photoList.getPhoto(position);
+        Post post = photoList.getPhoto(position);
 
 
         Glide.with(context)
-                .load(photo.getUri())
-                .centerCrop()
+                .load(post.getUri())
+                .centerInside()
                 .into(holder.imageView);
 
     }
