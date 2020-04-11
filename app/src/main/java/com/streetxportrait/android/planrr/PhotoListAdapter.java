@@ -52,9 +52,9 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
 
         Photo photo = photoList.getPhoto(position);
 
-        Uri uri = photo.getUri();
+
         Glide.with(context)
-                .load(uri)
+                .load(photo.getUri())
                 .centerCrop()
                 .into(holder.imageView);
 

@@ -1,6 +1,7 @@
 package com.streetxportrait.android.planrr;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class PhotoList {
 
@@ -35,12 +36,9 @@ public class PhotoList {
         mPhotos.remove(index);
     }
 
-    public void swapPhotos(Photo firstPhoto, Photo secondPhoto) {
-        int tempIndex1 = mPhotos.indexOf(firstPhoto);
-        int tempIndex2 = mPhotos.indexOf(secondPhoto);
+    public void swapPhotos(int firstPhoto, int secondPhoto) {
 
-        mPhotos.add(tempIndex1, secondPhoto);
-        mPhotos.add(tempIndex2, firstPhoto);
+        Collections.swap(mPhotos, firstPhoto, secondPhoto);
 
     }
 

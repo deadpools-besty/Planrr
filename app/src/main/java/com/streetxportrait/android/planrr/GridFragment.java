@@ -1,29 +1,30 @@
 package com.streetxportrait.android.planrr;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+
+public class GridFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
@@ -35,20 +36,26 @@ public class MainActivity extends AppCompatActivity {
     private PhotoList photoList;
     private SharedPreferences sharedPreferences;
 
-    private Toolbar toolbar;
+    public GridFragment() {
+        // Required empty public constructor
+    }
+
+
+    public GridFragment(PhotoList photoList) {
+        this.photoList = photoList;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
 
-        //photoList = new PhotoList();
-        getPhotos();
-        fab = findViewById(R.id.floatingActionButton);
-        fab.setOnClickListener(view -> openGallery());
+        View view = inflater.inflate(R.layout.activity_main, container, false);
 
-        adapter = new PhotoListAdapter(this, photoList);
-        recyclerView = findViewById(R.id.recyclerView);
+        fab = view.findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(v -> openGallery());
+
+        adapter = new PhotoListAdapter(getContext(), photoList);
+        recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
@@ -72,23 +79,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-    }
 
-    private void getPhotos() {
-        sharedPreferences = getSharedPreferences("key", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("Photos", null);
-        Type type = new TypeToken<PhotoList>(){}.getType();
-
-        photoList = gson.fromJson(json, type);
-
-        if (photoList == null) {
-            photoList = new PhotoList();
-        }
+        return view;
     }
 
     private void savePhotos() {
-        sharedPreferences = getSharedPreferences("key", MODE_PRIVATE);
+        getActivity();
+        sharedPreferences = getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(photoList);
@@ -97,15 +94,16 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+
     private void openGallery() {
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, PICK_IMAGE);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE){
+        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE){
             Photo photo = new Photo(data.getData());
             photoList.addPhoto(photo);
 
@@ -113,6 +111,4 @@ public class MainActivity extends AppCompatActivity {
             savePhotos();
         }
     }
-
-
 }

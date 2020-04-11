@@ -3,20 +3,22 @@ package com.streetxportrait.android.planrr;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
-public class Photo {
+import java.io.Serializable;
 
-    private Uri uri;
+public class Photo implements Serializable {
+
+    private String uri;
     private Bitmap bitmap;
 
     public Photo(Uri uri) {
-        this.uri = uri;
+        this.uri = uri.toString();
     }
 
     public void setUri(Uri uri) {
-        this.uri = uri;
+        this.uri = uri.toString();
     }
 
-    public Uri getUri() {
+    public String getUri() {
         return uri;
     }
 }
