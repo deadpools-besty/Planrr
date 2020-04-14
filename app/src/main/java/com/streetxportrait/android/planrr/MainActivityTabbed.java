@@ -1,12 +1,17 @@
 package com.streetxportrait.android.planrr;
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -30,11 +35,15 @@ public class MainActivityTabbed extends AppCompatActivity {
     private EditFragment editFragment;
     private SharedPreferences sharedPreferences;
     private PhotoList photoList;
+    private static final int WRITE_STORAGE_PERMISSION_RC = 21;
+    private static final int READ_STORAGE_PERMISSION_RC = 23;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_RC);
+        checkPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,READ_STORAGE_PERMISSION_RC);
         setContentView(R.layout.tabbed_main_activity);
         getPhotos();
         toolbar = findViewById(R.id.toolbar);
@@ -55,6 +64,54 @@ public class MainActivityTabbed extends AppCompatActivity {
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_grid_on_black_24dp);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_edit_black_24dp);
 
+    }
+
+    private void checkPermissions(String permission, int requestCode) {
+        if (ContextCompat.checkSelfPermission(MainActivityTabbed.this, permission)
+                == PackageManager.PERMISSION_DENIED) {
+
+            // Requesting the permission
+            ActivityCompat.requestPermissions(MainActivityTabbed.this,
+                    new String[] { permission },
+                    requestCode);
+        }
+
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == WRITE_STORAGE_PERMISSION_RC) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivityTabbed.this,
+                        "Writing Permission Granted",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+            else {
+                Toast.makeText(MainActivityTabbed.this,
+                        "Reading Permission Denied",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+
+        else if (requestCode == READ_STORAGE_PERMISSION_RC) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivityTabbed.this,
+                        "Writing Permission Granted",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+            else {
+                Toast.makeText(MainActivityTabbed.this,
+                        "Writing Permission Denied",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
     }
 
     private void getPhotos() {

@@ -72,14 +72,22 @@ public class EditFragment extends Fragment {
 
                 Glide.with(this)
                         .load(originalBitmap)
-                        .centerInside()
+                        .fitCenter()
                         .into(imageView);
 
                 imageView.setOnClickListener(v -> {
                     if (floatingActionButton.isOrWillBeShown()) {
+                        Glide.with(this)
+                                .load(finalBitmap)
+                                .fitCenter()
+                                .into(imageView);
                         floatingActionButton.hide();
                     }
                     else {
+                        Glide.with(this)
+                                .load(originalBitmap)
+                                .fitCenter()
+                                .into(imageView);
                         floatingActionButton.show();
                     }
                 });

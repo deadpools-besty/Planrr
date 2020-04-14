@@ -4,10 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -18,6 +18,7 @@ public class Post implements Serializable {
 
     private String uri;
     private Bitmap bitmap;
+    private final static String TAG = "Post";
 
 
     public Post(Uri uri) {
@@ -43,12 +44,14 @@ public class Post implements Serializable {
         Bitmap scaledBitmap;
         float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
 
-        if (!(bitmap.getWidth() > 1080 || bitmap.getHeight() > 1080)) {
-            if (bitmap.getWidth() >= bitmap.getHeight()) {
+        if (bitmap.getWidth() > 1080 || bitmap.getHeight() > 1080) {
+            Log.d(TAG, "getScaledBitmap: " + aspectRatio);
+            if (aspectRatio > 1) {
                 int width = 1080;
                 int height = Math.round(width / aspectRatio);
                 scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
             } else {
+                Log.d(TAG, "getScaledBitmap: hello");
                 int height = 1080;
                 int width = Math.round(height / aspectRatio);
                 scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
@@ -70,16 +73,27 @@ public class Post implements Serializable {
         canvas.drawColor(Color.WHITE);
 
         // centering bitmap in canvas
-        int canvasCentreV = canvas.getHeight() /2;
-        int canvasCentreH = canvas.getWidth() / 2;
-        int topLeftCornerX = canvasCentreV - (src.getHeight()/2);
-        int topLeftCornerY = canvasCentreH - (src.getWidth()/2);
-        int right = topLeftCornerX + src.getWidth();
-        int bottom = topLeftCornerY + src.getHeight();
+        float left;
+        float top;
+        if (src.getWidth() > src.getHeight()) {
+            left = 0;
+            top = (canvas.getHeight() / (float) 2) - (src.getHeight() / (float) 2);
+        }
+        else {
+            left = (canvas.getWidth() / (float) 2) - (src.getWidth() / (float) 2);
+            top = 0;
+        }
+        Log.d(TAG, "getBitmapWithBorder: left: " + left);
+        Log.d(TAG, "getBitmapWithBorder: top: " + top);
 
-        Rect finalRect = new Rect(topLeftCornerX, topLeftCornerY, right, bottom);
+        Log.d(TAG, "getBitmapWithBorder: cW : " + canvas.getWidth());
+        Log.d(TAG, "getBitmapWithBorder: sW : " + src.getWidth());
 
-        canvas.drawBitmap(src, null, finalRect, null);
+        Log.d(TAG, "getBitmapWithBorder: cH: " + canvas.getHeight());
+        Log.d(TAG, "getBitmapWithBorder: sH: " + src.getHeight());
+
+        canvas.drawBitmap(src, left, top, null);
+
 
         return borderedBitmap;
 
