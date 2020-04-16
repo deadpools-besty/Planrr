@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.UI;
 
 import android.Manifest;
 import android.content.SharedPreferences;
@@ -20,6 +20,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.streetxportrait.android.planrr.Model.PhotoList;
+import com.streetxportrait.android.planrr.R;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -43,7 +45,6 @@ public class MainActivityTabbed extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_RC);
-        checkPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,READ_STORAGE_PERMISSION_RC);
         setContentView(R.layout.tabbed_main_activity);
         getPhotos();
         toolbar = findViewById(R.id.toolbar);
@@ -92,26 +93,12 @@ public class MainActivityTabbed extends AppCompatActivity {
             }
             else {
                 Toast.makeText(MainActivityTabbed.this,
-                        "Reading Permission Denied",
-                        Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }
-
-        else if (requestCode == READ_STORAGE_PERMISSION_RC) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(MainActivityTabbed.this,
-                        "Writing Permission Granted",
-                        Toast.LENGTH_SHORT)
-                        .show();
-            }
-            else {
-                Toast.makeText(MainActivityTabbed.this,
                         "Writing Permission Denied",
                         Toast.LENGTH_SHORT)
                         .show();
             }
         }
+
     }
 
     private void getPhotos() {

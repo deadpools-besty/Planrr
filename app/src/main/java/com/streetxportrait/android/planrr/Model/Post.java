@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.Model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -53,7 +53,7 @@ public class Post implements Serializable {
             } else {
                 Log.d(TAG, "getScaledBitmap: hello");
                 int height = 1080;
-                int width = Math.round(height / aspectRatio);
+                int width = Math.round(height * aspectRatio);
                 scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
             }
             return scaledBitmap;
@@ -90,7 +90,7 @@ public class Post implements Serializable {
         Log.d(TAG, "getBitmapWithBorder: sW : " + src.getWidth());
 
         Log.d(TAG, "getBitmapWithBorder: cH: " + canvas.getHeight());
-        Log.d(TAG, "getBitmapWithBorder: sH: " + src.getHeight());
+        Log.d(TAG, "getBitmapWithBorder: sH:  " + src.getHeight());
 
         canvas.drawBitmap(src, left, top, null);
 

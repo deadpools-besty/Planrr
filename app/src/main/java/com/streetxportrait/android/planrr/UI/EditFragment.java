@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.UI;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.streetxportrait.android.planrr.Model.Post;
+import com.streetxportrait.android.planrr.R;
 
 import java.io.IOException;
 
@@ -29,6 +32,7 @@ public class EditFragment extends Fragment {
 
     private ImageView imageView;
     private static final int PICK_IMAGE = 100;
+    private static final String TAG = "Edit-Fragment";
     private FloatingActionButton floatingActionButton;
 
     public EditFragment() {
@@ -52,7 +56,7 @@ public class EditFragment extends Fragment {
 
     private void openGallery() {
         Intent gallery = new Intent(Intent.ACTION_PICK);
-        gallery.setDataAndType(MediaStore.Images.Media.INTERNAL_CONTENT_URI, "image/");
+        gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         startActivityForResult(gallery, PICK_IMAGE);
     }
 
@@ -63,6 +67,7 @@ public class EditFragment extends Fragment {
 
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE && data != null){
             Uri uri = data.getData();
+            Log.d(TAG, "onActivityResult: " + uri);
             Post photo = new Post(uri);
 
             try {
@@ -77,6 +82,8 @@ public class EditFragment extends Fragment {
 
                 imageView.setOnClickListener(v -> {
                     if (floatingActionButton.isOrWillBeShown()) {
+
+
                         Glide.with(this)
                                 .load(finalBitmap)
                                 .fitCenter()
@@ -92,6 +99,7 @@ public class EditFragment extends Fragment {
                     }
                 });
             } catch (IOException e) {
+                Log.d(TAG, "onActivityResult: " + e.toString());
                 e.printStackTrace();
             }
 

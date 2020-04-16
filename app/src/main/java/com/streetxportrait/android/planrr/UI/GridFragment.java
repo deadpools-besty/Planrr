@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.UI;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,6 +19,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
+import com.streetxportrait.android.planrr.Model.PhotoList;
+import com.streetxportrait.android.planrr.Model.Post;
+import com.streetxportrait.android.planrr.R;
+import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
 
 
 public class GridFragment extends Fragment {
@@ -94,7 +98,7 @@ public class GridFragment extends Fragment {
 
     private void openGallery() {
         Intent gallery = new Intent(Intent.ACTION_PICK);
-        gallery.setDataAndType(MediaStore.Images.Media.INTERNAL_CONTENT_URI, "image/");
+        gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         startActivityForResult(gallery, PICK_IMAGE);
     }
 

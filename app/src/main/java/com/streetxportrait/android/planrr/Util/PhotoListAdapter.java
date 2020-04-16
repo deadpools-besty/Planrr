@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.Util;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.streetxportrait.android.planrr.Model.PhotoList;
+import com.streetxportrait.android.planrr.Model.Post;
+import com.streetxportrait.android.planrr.R;
 import com.theophrast.ui.widget.SquareImageView;
 
 public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.PhotoListViewHolder> {

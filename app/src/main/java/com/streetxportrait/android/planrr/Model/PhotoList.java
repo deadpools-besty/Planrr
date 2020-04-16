@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;

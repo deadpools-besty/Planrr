@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr;
+package com.streetxportrait.android.planrr.UI;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +15,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.streetxportrait.android.planrr.Model.PhotoList;
+import com.streetxportrait.android.planrr.Model.Post;
+import com.streetxportrait.android.planrr.R;
+import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
 
 import java.lang.reflect.Type;
 
