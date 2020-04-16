@@ -51,7 +51,7 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
 
         Glide.with(context)
                 .load(post.getUri())
-                .centerInside()
+                .centerCrop()
                 .into(holder.imageView);
 
     }

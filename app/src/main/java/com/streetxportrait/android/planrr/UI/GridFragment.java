@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,8 @@ import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
 import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
+
+import java.io.IOException;
 
 
 public class GridFragment extends Fragment {
@@ -84,6 +87,9 @@ public class GridFragment extends Fragment {
         return view;
     }
 
+    /**
+     * save photos from grid to shared preferences
+     */
     private void savePhotos() {
         getActivity();
         sharedPreferences = getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
@@ -95,7 +101,9 @@ public class GridFragment extends Fragment {
         editor.apply();
     }
 
-
+    /**
+     * open gallery through intent to pick an image
+     */
     private void openGallery() {
         Intent gallery = new Intent(Intent.ACTION_PICK);
         gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
@@ -107,10 +115,25 @@ public class GridFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE){
             Post post = new Post(data.getData());
-            photoList.addPhoto(post);
 
-            adapter.notifyDataSetChanged();
-            savePhotos();
+            boolean validImage = false;
+            try {
+                validImage = post.checkIsImage(this.getContext(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (validImage) {
+                photoList.addPhoto(post);
+                adapter.notifyDataSetChanged();
+                savePhotos();
+            }
+
+            else {
+                Toast.makeText(getContext(), "Selected file was not an image. Please select an image file", Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
+
 }

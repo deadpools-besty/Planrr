@@ -1,7 +1,9 @@
 package com.streetxportrait.android.planrr.Model;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
@@ -12,6 +14,7 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 
 public class Post implements Serializable {
@@ -33,6 +36,32 @@ public class Post implements Serializable {
         return uri;
     }
 
+    public boolean checkIsImage(Context context, Uri uri) throws IOException {
+        ContentResolver contentResolver = context.getContentResolver();
+        String type = contentResolver.getType(uri);
+        if (type != null) {
+            return  type.startsWith("image/");
+        } else {
+            // try to decode as image (bounds only)
+            InputStream inputStream = null;
+            try {
+                inputStream = contentResolver.openInputStream(uri);
+                if (inputStream != null) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeStream(inputStream, null, options);
+                    return options.outWidth > 0 && options.outHeight > 0;
+                }
+            } catch (IOException e) {
+                // ignore
+            } finally {
+                inputStream.close();
+            }
+        }
+        // default outcome if image not confirmed
+        return false;
+    }
+
     public Bitmap createBitmap(Context context) throws IOException {
 
         bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(uri));
@@ -40,6 +69,10 @@ public class Post implements Serializable {
         return bitmap;
     }
 
+    /**
+     * scale bitmap down to 1080 pixels on its longest edge
+     * @return bitmap that has been scaled down
+     */
     public Bitmap getScaledBitmap() {
         Bitmap scaledBitmap;
         float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
@@ -64,6 +97,10 @@ public class Post implements Serializable {
         }
     }
 
+    /**
+     * get bitmap with border around it
+     * @return return bitmap with border around it
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Bitmap getBitmapWithBorder() {
 
