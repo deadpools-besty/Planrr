@@ -67,6 +67,7 @@ public class MainActivityTabbed extends AppCompatActivity {
 
     }
 
+
     private void checkPermissions(String permission, int requestCode) {
         if (ContextCompat.checkSelfPermission(MainActivityTabbed.this, permission)
                 == PackageManager.PERMISSION_DENIED) {

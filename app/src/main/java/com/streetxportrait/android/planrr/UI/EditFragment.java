@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -35,6 +36,15 @@ public class EditFragment extends Fragment {
     private static final int PICK_IMAGE = 100;
     private static final String TAG = "Edit-Fragment";
     private FloatingActionButton floatingActionButton;
+    private Post photo;
+    private Bitmap originalBitmap;
+    private Bitmap finalBitmap;
+    private Button saveButton;
+    private static final int ORGINAL_SHOWING = 1;
+    private static final int BORDERED_SHOWING = 0;
+
+    private int IMAGE_SHOWING = BORDERED_SHOWING;
+
 
     public EditFragment() {
         // Required empty public constructor
@@ -45,6 +55,8 @@ public class EditFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
+
+
         floatingActionButton = view.findViewById(R.id.edit_fab);
         imageView = view.findViewById(R.id.edit_bitmap);
 
@@ -54,6 +66,7 @@ public class EditFragment extends Fragment {
 
         return view;
     }
+
 
     /**
      * open gallery through intent to pick an image
@@ -77,8 +90,8 @@ public class EditFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void handleImage(Uri uri) {
-        Log.d(TAG, "onActivityResult: " + uri);
-        Post photo = new Post(uri);
+        Log.d(TAG, "handle image: " + uri);
+        photo = new Post(uri);
 
         boolean validImage = false;
         try {
@@ -89,25 +102,26 @@ public class EditFragment extends Fragment {
 
         if (validImage) {
             try {
-                Bitmap originalBitmap = photo.createBitmap(getContext());
-                Bitmap finalBitmap = photo.getBitmapWithBorder();
+                originalBitmap = photo.createBitmap(getContext());
+                finalBitmap = photo.getBitmapWithBorder();
 
-
-                Glide.with(this)
-                        .load(finalBitmap)
-                        .fitCenter()
-                        .into(imageView);
-
-                imageView.setOnClickListener(v -> {
-                    if (floatingActionButton.isOrWillBeShown()) {
-                        floatingActionButton.hide();
+                imageView.setOnLongClickListener(v -> {
+                    if (IMAGE_SHOWING == BORDERED_SHOWING) {
+                        Glide.with(this)
+                                .load(originalBitmap)
+                                .fitCenter()
+                                .into(imageView);
                     }
                     else {
-                        floatingActionButton.show();
+                        Glide.with(this)
+                                .load(finalBitmap)
+                                .fitCenter()
+                                .into(imageView);
                     }
+                    return true;
                 });
             } catch (IOException e) {
-                Log.d(TAG, "onActivityResult: " + e.toString());
+                Log.d(TAG, "handle image: " + e.toString());
                 e.printStackTrace();
             }
 

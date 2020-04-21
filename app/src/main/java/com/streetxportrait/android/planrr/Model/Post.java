@@ -2,19 +2,25 @@ package com.streetxportrait.android.planrr.Model;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 
 public class Post implements Serializable {
@@ -22,10 +28,12 @@ public class Post implements Serializable {
     private String uri;
     private Bitmap bitmap;
     private final static String TAG = "Post";
+    private String uriFilename;
 
 
     public Post(Uri uri) {
         this.uri = uri.toString();
+
     }
 
     public void setUri(Uri uri) {
@@ -36,7 +44,20 @@ public class Post implements Serializable {
         return uri;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String getFilename(Context context) {
+
+        Uri actualUri = Uri.parse(uri);
+        actualUri.getPath();
+
+        Cursor returnCursor = context.getContentResolver().query(actualUri, null, null, null);
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        uriFilename = returnCursor.getString(nameIndex);
+        return  uriFilename;
+    }
+
     public boolean checkIsImage(Context context, Uri uri) throws IOException {
+
         ContentResolver contentResolver = context.getContentResolver();
         String type = contentResolver.getType(uri);
         if (type != null) {
@@ -120,6 +141,7 @@ public class Post implements Serializable {
             left = (canvas.getWidth() / (float) 2) - (src.getWidth() / (float) 2);
             top = 0;
         }
+
         Log.d(TAG, "getBitmapWithBorder: left: " + left);
         Log.d(TAG, "getBitmapWithBorder: top: " + top);
 
@@ -127,13 +149,36 @@ public class Post implements Serializable {
         Log.d(TAG, "getBitmapWithBorder: sW : " + src.getWidth());
 
         Log.d(TAG, "getBitmapWithBorder: cH: " + canvas.getHeight());
-        Log.d(TAG, "getBitmapWithBorder: sH:  " + src.getHeight());
+        Log.d(TAG, "getBitmapWithBorder: sH: " + src.getHeight());
 
         canvas.drawBitmap(src, left, top, null);
 
-
         return borderedBitmap;
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void saveBitmap(Bitmap bitmap, Context context) {
+
+        getFilename(context);
+        String outputFileName = uriFilename.concat("-bordered");
+
+        String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Planrr/" + outputFileName;
+
+        File imageFile = new File(path);
+        if (!imageFile.getParentFile().exists()) {
+            imageFile.getParentFile().mkdir();
+        }
+
+        OutputStream out;
+        try {
+            out = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
