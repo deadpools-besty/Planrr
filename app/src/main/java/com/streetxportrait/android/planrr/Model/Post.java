@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -26,18 +27,18 @@ import java.io.Serializable;
 public class Post implements Serializable {
 
     private String uri;
+    private Uri uriObject;
     private Bitmap bitmap;
     private final static String TAG = "Post";
     private String uriFilename;
+    private BitmapFactory.Options options;
+    private static final int LONG_EDGE_SIZE = 1080;
 
 
     public Post(Uri uri) {
+        uriObject = uri;
         this.uri = uri.toString();
 
-    }
-
-    public void setUri(Uri uri) {
-        this.uri = uri.toString();
     }
 
     public String getUri() {
@@ -47,13 +48,29 @@ public class Post implements Serializable {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String getFilename(Context context) {
 
-        Uri actualUri = Uri.parse(uri);
-        actualUri.getPath();
+        String result = null;
 
-        Cursor returnCursor = context.getContentResolver().query(actualUri, null, null, null);
-        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-        uriFilename = returnCursor.getString(nameIndex);
-        return  uriFilename;
+        uriObject.getPath();
+        Cursor returnCursor = context.getContentResolver().query(uriObject, null, null, null);
+
+        try {
+            if (returnCursor != null && returnCursor.moveToFirst()) {
+                result = returnCursor.getString(returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            }
+        } finally {
+            if (returnCursor != null)
+            returnCursor.close();
+        }
+
+        if (result == null) {
+            result = uriObject.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut+1);
+            }
+        }
+        uriFilename = result;
+        return result;
     }
 
     public boolean checkIsImage(Context context, Uri uri) throws IOException {
@@ -85,6 +102,14 @@ public class Post implements Serializable {
 
     public Bitmap createBitmap(Context context) throws IOException {
 
+        options = new BitmapFactory.Options();
+
+        options.inJustDecodeBounds = true;
+        options.inScaled = false;
+        options.inDither = false;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        BitmapFactory.decodeFile(uriObject.getPath(), options);
+        Log.d(TAG, "createBitmap: " + uriObject.getLastPathSegment());
         bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(uri));
 
         return bitmap;
@@ -95,21 +120,30 @@ public class Post implements Serializable {
      * @return bitmap that has been scaled down
      */
     public Bitmap getScaledBitmap() {
-        Bitmap scaledBitmap;
-        float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
 
-        if (bitmap.getWidth() > 1080 || bitmap.getHeight() > 1080) {
+
+        Bitmap scaledBitmap;
+
+        int srcWidth = options.outWidth;
+        int srcHeight = options.outHeight;
+        float aspectRatio = srcWidth/ (float) srcHeight;
+
+        if (srcWidth > LONG_EDGE_SIZE || srcHeight > LONG_EDGE_SIZE) {
             Log.d(TAG, "getScaledBitmap: " + aspectRatio);
+            int fHeight;
+            int fWidth;
+
             if (aspectRatio > 1) {
-                int width = 1080;
-                int height = Math.round(width / aspectRatio);
-                scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
+                fWidth = LONG_EDGE_SIZE;
+                fHeight = Math.round(fWidth / aspectRatio);
+
             } else {
-                Log.d(TAG, "getScaledBitmap: hello");
-                int height = 1080;
-                int width = Math.round(height * aspectRatio);
-                scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
+                fHeight = LONG_EDGE_SIZE;
+                fWidth = Math.round(fHeight * aspectRatio);
             }
+
+
+            scaledBitmap = Bitmap.createScaledBitmap(bitmap, fWidth, fHeight, true);
             return scaledBitmap;
         }
 
@@ -125,15 +159,27 @@ public class Post implements Serializable {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Bitmap getBitmapWithBorder() {
 
-        Bitmap borderedBitmap = Bitmap.createBitmap(1080, 1080, Bitmap.Config.RGBA_F16);
         Bitmap src = getScaledBitmap();
+        int srcLongEdge;
+        int srcWidth = src.getWidth();
+        int srcHeight = src.getHeight();
+
+        if (srcWidth > srcHeight) {
+            srcLongEdge = srcWidth;
+        }
+        else {
+            srcLongEdge = srcHeight;
+        }
+
+        Bitmap borderedBitmap = Bitmap.createBitmap(srcLongEdge, srcLongEdge, Bitmap.Config.ARGB_8888);
+
         Canvas canvas = new Canvas(borderedBitmap);
         canvas.drawColor(Color.WHITE);
 
         // centering bitmap in canvas
         float left;
         float top;
-        if (src.getWidth() > src.getHeight()) {
+        if (srcWidth > srcHeight) {
             left = 0;
             top = (canvas.getHeight() / (float) 2) - (src.getHeight() / (float) 2);
         }
@@ -151,7 +197,11 @@ public class Post implements Serializable {
         Log.d(TAG, "getBitmapWithBorder: cH: " + canvas.getHeight());
         Log.d(TAG, "getBitmapWithBorder: sH: " + src.getHeight());
 
-        canvas.drawBitmap(src, left, top, null);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+        canvas.drawBitmap(src, left, top, paint);
 
         return borderedBitmap;
 
@@ -161,10 +211,11 @@ public class Post implements Serializable {
     public void saveBitmap(Bitmap bitmap, Context context) {
 
         getFilename(context);
-        String outputFileName = uriFilename.concat("-bordered");
+        String outputFileName = uriFilename;
 
         String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Planrr/" + outputFileName;
 
+        Log.d(TAG, "saveBitmap: " + path);
         File imageFile = new File(path);
         if (!imageFile.getParentFile().exists()) {
             imageFile.getParentFile().mkdir();
@@ -177,6 +228,7 @@ public class Post implements Serializable {
             out.flush();
             out.close();
         } catch (IOException e) {
+            Log.d(TAG, "saveBitmap: " + e);
             e.printStackTrace();
         }
     }

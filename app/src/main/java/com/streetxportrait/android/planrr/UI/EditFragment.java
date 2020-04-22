@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -20,6 +19,7 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
@@ -32,7 +32,7 @@ import java.io.IOException;
  */
 public class EditFragment extends Fragment {
 
-    private ImageView imageView;
+    private PhotoView imageView;
     private static final int PICK_IMAGE = 100;
     private static final String TAG = "Edit-Fragment";
     private FloatingActionButton floatingActionButton;
@@ -40,9 +40,9 @@ public class EditFragment extends Fragment {
     private Bitmap originalBitmap;
     private Bitmap finalBitmap;
     private Button saveButton;
+    private Bitmap scaledBitmap;
     private static final int ORGINAL_SHOWING = 1;
     private static final int BORDERED_SHOWING = 0;
-
     private int IMAGE_SHOWING = BORDERED_SHOWING;
 
 
@@ -63,6 +63,8 @@ public class EditFragment extends Fragment {
         floatingActionButton.setOnClickListener(v -> {
             openGallery();
         });
+        saveButton = view.findViewById(R.id.save_button);
+
 
         return view;
     }
@@ -85,6 +87,12 @@ public class EditFragment extends Fragment {
 
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE && data != null) {
             handleImage(data.getData());
+            saveButton.setVisibility(View.VISIBLE);
+            saveButton.setOnClickListener(v -> {
+                photo.saveBitmap(finalBitmap, getContext());
+                Log.d(TAG, "onActivityResult: saved");
+
+            });
         }
     }
 
@@ -104,21 +112,14 @@ public class EditFragment extends Fragment {
             try {
                 originalBitmap = photo.createBitmap(getContext());
                 finalBitmap = photo.getBitmapWithBorder();
+                scaledBitmap = photo.getScaledBitmap();
+                Glide.with(this)
+                        .load(finalBitmap)
+                        .fitCenter()
+                        .into(imageView);
 
-                imageView.setOnLongClickListener(v -> {
-                    if (IMAGE_SHOWING == BORDERED_SHOWING) {
-                        Glide.with(this)
-                                .load(originalBitmap)
-                                .fitCenter()
-                                .into(imageView);
-                    }
-                    else {
-                        Glide.with(this)
-                                .load(finalBitmap)
-                                .fitCenter()
-                                .into(imageView);
-                    }
-                    return true;
+                imageView.setOnClickListener(v -> {
+                    switchImages();
                 });
             } catch (IOException e) {
                 Log.d(TAG, "handle image: " + e.toString());
@@ -129,7 +130,23 @@ public class EditFragment extends Fragment {
         else {
             Toast.makeText(getContext(), "Selected file was not an image. Please select an image file", Toast.LENGTH_SHORT).show();
         }
+    }
 
+    private void switchImages() {
+        if (IMAGE_SHOWING == BORDERED_SHOWING) {
+            IMAGE_SHOWING = ORGINAL_SHOWING;
+            Glide.with(this)
+                    .load(originalBitmap)
+                    .fitCenter()
+                    .into(imageView);
+        }
+        else {
+            IMAGE_SHOWING = BORDERED_SHOWING;
+            Glide.with(this)
+                    .load(finalBitmap)
+                    .fitCenter()
+                    .into(imageView);
+        }
     }
 
 }
