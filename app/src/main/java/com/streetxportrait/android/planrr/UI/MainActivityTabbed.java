@@ -38,8 +38,6 @@ public class MainActivityTabbed extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private PhotoList photoList;
     private static final int WRITE_STORAGE_PERMISSION_RC = 21;
-    private static final int READ_STORAGE_PERMISSION_RC = 23;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

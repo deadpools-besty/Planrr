@@ -40,10 +40,11 @@ public class EditFragment extends Fragment {
     private Bitmap originalBitmap;
     private Bitmap finalBitmap;
     private Button saveButton;
-    private Bitmap scaledBitmap;
+    private Bitmap originalScaledBitmap;
     private static final int ORGINAL_SHOWING = 1;
     private static final int BORDERED_SHOWING = 0;
     private int IMAGE_SHOWING = BORDERED_SHOWING;
+    private Bitmap finalScaledBitmap;
 
 
     public EditFragment() {
@@ -87,12 +88,7 @@ public class EditFragment extends Fragment {
 
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE && data != null) {
             handleImage(data.getData());
-            saveButton.setVisibility(View.VISIBLE);
-            saveButton.setOnClickListener(v -> {
-                photo.saveBitmap(finalBitmap, getContext());
-                Log.d(TAG, "onActivityResult: saved");
 
-            });
         }
     }
 
@@ -109,18 +105,24 @@ public class EditFragment extends Fragment {
         }
 
         if (validImage) {
+            saveButton.setVisibility(View.VISIBLE);
+            saveButton.setOnClickListener(v -> {
+                photo.saveBitmap(finalBitmap, getContext());
+                Log.d(TAG, "onActivityResult: saved");
+
+            });
+
             try {
                 originalBitmap = photo.createBitmap(getContext());
                 finalBitmap = photo.getBitmapWithBorder();
-                scaledBitmap = photo.getScaledBitmap();
+                originalScaledBitmap = photo.getScaledBitmap(originalBitmap);
+                finalScaledBitmap = photo.getScaledBitmap(finalBitmap);
                 Glide.with(this)
-                        .load(finalBitmap)
+                        .load(finalScaledBitmap)
                         .fitCenter()
                         .into(imageView);
 
-                imageView.setOnClickListener(v -> {
-                    switchImages();
-                });
+                imageView.setOnClickListener(v -> switchImages());
             } catch (IOException e) {
                 Log.d(TAG, "handle image: " + e.toString());
                 e.printStackTrace();
@@ -136,14 +138,14 @@ public class EditFragment extends Fragment {
         if (IMAGE_SHOWING == BORDERED_SHOWING) {
             IMAGE_SHOWING = ORGINAL_SHOWING;
             Glide.with(this)
-                    .load(originalBitmap)
+                    .load(originalScaledBitmap)
                     .fitCenter()
                     .into(imageView);
         }
         else {
             IMAGE_SHOWING = BORDERED_SHOWING;
             Glide.with(this)
-                    .load(finalBitmap)
+                    .load(finalScaledBitmap)
                     .fitCenter()
                     .into(imageView);
         }

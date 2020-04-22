@@ -27,7 +27,6 @@ import java.io.Serializable;
 public class Post implements Serializable {
 
     private String uri;
-    private Uri uriObject;
     private Bitmap bitmap;
     private final static String TAG = "Post";
     private String uriFilename;
@@ -35,10 +34,9 @@ public class Post implements Serializable {
     private static final int LONG_EDGE_SIZE = 1080;
 
 
-    public Post(Uri uri) {
-        uriObject = uri;
-        this.uri = uri.toString();
 
+    public Post(Uri uri) {
+        this.uri = uri.toString();
     }
 
     public String getUri() {
@@ -50,8 +48,8 @@ public class Post implements Serializable {
 
         String result = null;
 
-        uriObject.getPath();
-        Cursor returnCursor = context.getContentResolver().query(uriObject, null, null, null);
+        getParsedUri().getPath();
+        Cursor returnCursor = context.getContentResolver().query(getParsedUri(), null, null, null);
 
         try {
             if (returnCursor != null && returnCursor.moveToFirst()) {
@@ -63,7 +61,7 @@ public class Post implements Serializable {
         }
 
         if (result == null) {
-            result = uriObject.getPath();
+            result = getParsedUri().getPath();
             int cut = result.lastIndexOf('/');
             if (cut != -1) {
                 result = result.substring(cut+1);
@@ -71,6 +69,10 @@ public class Post implements Serializable {
         }
         uriFilename = result;
         return result;
+    }
+
+    public Uri getParsedUri() {
+        return Uri.parse(uri);
     }
 
     public boolean checkIsImage(Context context, Uri uri) throws IOException {
@@ -102,14 +104,14 @@ public class Post implements Serializable {
 
     public Bitmap createBitmap(Context context) throws IOException {
 
-        options = new BitmapFactory.Options();
+        /*options = new BitmapFactory.Options();
 
-        options.inJustDecodeBounds = true;
+        options.inJustDecodeBounds = false;
         options.inScaled = false;
         options.inDither = false;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        BitmapFactory.decodeFile(uriObject.getPath(), options);
-        Log.d(TAG, "createBitmap: " + uriObject.getLastPathSegment());
+        bitmap = BitmapFactory.decodeFile(getParsedUri().getPath(), options);
+        Log.d(TAG, "createBitmap: " + getParsedUri().getPath());*/
         bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(uri));
 
         return bitmap;
@@ -119,13 +121,13 @@ public class Post implements Serializable {
      * scale bitmap down to 1080 pixels on its longest edge
      * @return bitmap that has been scaled down
      */
-    public Bitmap getScaledBitmap() {
+    public Bitmap getScaledBitmap(Bitmap bitmapToScale) {
 
 
         Bitmap scaledBitmap;
 
-        int srcWidth = options.outWidth;
-        int srcHeight = options.outHeight;
+        int srcWidth = bitmapToScale.getWidth();
+        int srcHeight = bitmapToScale.getHeight();
         float aspectRatio = srcWidth/ (float) srcHeight;
 
         if (srcWidth > LONG_EDGE_SIZE || srcHeight > LONG_EDGE_SIZE) {
@@ -143,12 +145,12 @@ public class Post implements Serializable {
             }
 
 
-            scaledBitmap = Bitmap.createScaledBitmap(bitmap, fWidth, fHeight, true);
+            scaledBitmap = Bitmap.createScaledBitmap(bitmapToScale, fWidth, fHeight, true);
             return scaledBitmap;
         }
 
         else {
-            return bitmap;
+            return bitmapToScale;
         }
     }
 
@@ -159,7 +161,7 @@ public class Post implements Serializable {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Bitmap getBitmapWithBorder() {
 
-        Bitmap src = getScaledBitmap();
+        Bitmap src = getScaledBitmap(bitmap);
         int srcLongEdge;
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
