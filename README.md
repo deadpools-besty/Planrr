@@ -17,5 +17,5 @@
 Nana Andoh
 
 ## License and Citations
-This application is licensed under the [Apache License, Version 2.0](https://github.com/CMPUT301W20T07/arrival/wiki/Glossary#license)
+This application is licensed under the [Apache License, Version 2.0](https://github.com/deadpools-besty/Planrr/blob/master/LICENSE)
 <br><br>
