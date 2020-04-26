@@ -45,10 +45,10 @@ public class MainActivityTabbed extends AppCompatActivity {
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_RC);
         setContentView(R.layout.tabbed_main_activity);
         getPhotos();
-        toolbar = findViewById(R.id.toolbar);
+
         viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tab_layout);
-        setSupportActionBar(toolbar);
+
 
         gridFragment = new GridFragment(photoList);
         editFragment = new EditFragment();
