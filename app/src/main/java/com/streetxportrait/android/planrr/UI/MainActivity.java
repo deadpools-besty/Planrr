@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         //photoList = new PhotoList();
         getPhotos();
-        fab = findViewById(R.id.floatingActionButton);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> openGallery());
 
         adapter = new PhotoListAdapter(this, photoList);

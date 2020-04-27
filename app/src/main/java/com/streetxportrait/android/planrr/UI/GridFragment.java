@@ -7,7 +7,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -15,17 +22,29 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.selection.OnDragInitiatedListener;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.play.core.assetpacks.as;
 import com.google.gson.Gson;
 import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
+import com.streetxportrait.android.planrr.Util.ActionModeController;
 import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
+import com.streetxportrait.android.planrr.Util.PostDetailsLookup;
+import com.streetxportrait.android.planrr.Util.PostKeyProvider;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
 
 
 public class GridFragment extends Fragment {
@@ -39,6 +58,10 @@ public class GridFragment extends Fragment {
     private FloatingActionButton fab;
     private PhotoList photoList;
     private SharedPreferences sharedPreferences;
+    private SelectionTracker selectionTracker;
+    private ActionMode actionMode;
+    private BottomAppBar bottomAppBar;
+
 
     public GridFragment() {
         // Required empty public constructor
@@ -50,21 +73,95 @@ public class GridFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.grid_menu, menu);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        if (savedInstanceState != null) {
+            selectionTracker.onRestoreInstanceState(savedInstanceState);
+        }
+
         View view = inflater.inflate(R.layout.activity_main, container, false);
 
-        fab = view.findViewById(R.id.floatingActionButton);
+        fab = view.findViewById(R.id.fab);
+        recyclerView = view.findViewById(R.id.recyclerView);
+        bottomAppBar = view.findViewById(R.id.bottom_app_bar);
+
+        ((AppCompatActivity) getActivity()).setSupportActionBar(bottomAppBar);
+
         fab.setOnClickListener(v -> openGallery());
 
         adapter = new PhotoListAdapter(getContext(), photoList);
-        recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
+        selectionTracker = new SelectionTracker.Builder<>(
+                "post-select",
+                recyclerView,
+                new PostKeyProvider(1, photoList),
+                new PostDetailsLookup(recyclerView),
+                StorageStrategy.createStringStorage()
+        ).withOnDragInitiatedListener(e -> {
+            Log.d(TAG, "onDragInitiated: ");
+            return true;
+        }).build();
+
+        adapter.setSelectionTracker(selectionTracker);
+
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver() {
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+                if (selectionTracker.hasSelection() && actionMode == null) {
+                    actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new ActionModeController(getContext(), selectionTracker));
+                }
+                else if (!selectionTracker.hasSelection() && actionMode != null) {
+                    actionMode.finish();
+                    actionMode = null;
+                } else {
+
+                }
+                for (Post post : (Iterable<Post>) selectionTracker.getSelection()) {
+                    Log.d(TAG, "onSelectionChanged: " + post.getUri());
+                }
+            }
+        });
+/*
+        ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder dragged, @NonNull RecyclerView.ViewHolder target) {
+                int positionDragged = dragged.getAdapterPosition();
+                int positionTarget = target.getAdapterPosition();
+
+                photoList.swapPhotos(positionDragged, positionTarget);
+
+                adapter.notifyItemMoved(positionDragged, positionTarget);
+
+                return false;
+            }
+
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+        });
+
+        helper.attachToRecyclerView(recyclerView);
+
+     */
         // set hiding and showing of fab
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -76,13 +173,13 @@ public class GridFragment extends Fragment {
             }
         });
 
+/*
         adapter.setOnItemClickListener(position -> {
             photoList.removePhoto(position);
             adapter.notifyDataSetChanged();
             savePhotos();
         });
-
-
+*/
 
         return view;
     }
@@ -136,4 +233,9 @@ public class GridFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        selectionTracker.onSaveInstanceState(outState);
+    }
 }

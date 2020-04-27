@@ -2,6 +2,7 @@ package com.streetxportrait.android.planrr.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class PhotoList {
 
@@ -40,6 +41,22 @@ public class PhotoList {
 
         Collections.swap(mPosts, firstPhoto, secondPhoto);
 
+    }
+
+    public int getIndexOfPhoto(Object post) {
+        return mPosts.indexOf(post);
+    }
+
+    public List<Integer> getSelectedItems() {
+        ArrayList<Integer> selectedList = new ArrayList<>();
+
+        for (Post p : mPosts) {
+            if (p.getIsSelected()) {
+                selectedList.add(mPosts.indexOf(p));
+            }
+        }
+
+        return selectedList;
     }
 
 

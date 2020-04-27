@@ -32,6 +32,7 @@ public class Post implements Serializable {
     private String uriFilename;
     private BitmapFactory.Options options;
     private static final int LONG_EDGE_SIZE = 1080;
+    private boolean isSelected = false;
 
 
 
@@ -71,8 +72,16 @@ public class Post implements Serializable {
         return result;
     }
 
-    public Uri getParsedUri() {
+    private Uri getParsedUri() {
         return Uri.parse(uri);
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public boolean getIsSelected() {
+        return isSelected;
     }
 
     public boolean checkIsImage(Context context, Uri uri) throws IOException {
