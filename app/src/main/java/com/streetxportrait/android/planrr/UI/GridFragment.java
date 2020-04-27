@@ -14,6 +14,7 @@ import androidx.appcompat.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +62,7 @@ public class GridFragment extends Fragment {
     private SelectionTracker selectionTracker;
     private ActionMode actionMode;
     private BottomAppBar bottomAppBar;
+    private MenuItem deleteItem;
 
 
     public GridFragment() {
@@ -81,6 +83,8 @@ public class GridFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.grid_menu, menu);
+        deleteItem = menu.findItem(R.id.delete_items);
+        deleteItem.setVisible(false);
     }
 
     @Override
@@ -107,6 +111,7 @@ public class GridFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
+
         selectionTracker = new SelectionTracker.Builder<>(
                 "post-select",
                 recyclerView,
@@ -126,12 +131,14 @@ public class GridFragment extends Fragment {
                 super.onSelectionChanged();
                 if (selectionTracker.hasSelection() && actionMode == null) {
                     actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new ActionModeController(getContext(), selectionTracker));
+                    deleteItem.setVisible(true);
                 }
                 else if (!selectionTracker.hasSelection() && actionMode != null) {
                     actionMode.finish();
                     actionMode = null;
+                    deleteItem.setVisible(false);
                 } else {
-
+                    deleteItem.setVisible(true);
                 }
                 for (Post post : (Iterable<Post>) selectionTracker.getSelection()) {
                     Log.d(TAG, "onSelectionChanged: " + post.getUri());
@@ -161,15 +168,19 @@ public class GridFragment extends Fragment {
 
         helper.attachToRecyclerView(recyclerView);
 
-     */
+
+*/
         // set hiding and showing of fab
+        Log.d(TAG, "onCreateView: " + bottomAppBar.getHideOnScroll());
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0)
+                if (dy > 0) {
                     fab.hide();
-                else if (dy < 0)
+                }
+                else if (dy < 0) {
                     fab.show();
+                }
             }
         });
 

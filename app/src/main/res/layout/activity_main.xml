@@ -18,17 +18,22 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.bottomappbar.BottomAppBar
-            style="@style/Widget.MaterialComponents.BottomAppBar"
             android:id="@+id/bottom_app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+            app:hideOnScroll="true"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:backgroundTint="@color/primaryColor"
             app:fabAlignmentMode="center"
+            app:fabCradleMargin="0dp"
+            app:fabCradleRoundedCornerRadius="0dp"
             />
 
 
