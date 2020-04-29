@@ -55,7 +55,7 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
     public void onBindViewHolder(@NonNull PhotoListAdapter.PhotoListViewHolder holder, int position) {
 
         Post post = photoList.getPhoto(position);
-        holder.bind(post, selectionTracker.isSelected(post));
+//        holder.bind(post, selectionTracker.isSelected(post));
         Glide.with(context)
                 .load(post.getUri())
                 .centerCrop()

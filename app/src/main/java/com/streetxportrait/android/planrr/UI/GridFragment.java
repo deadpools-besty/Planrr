@@ -63,7 +63,10 @@ public class GridFragment extends Fragment {
     private ActionMode actionMode;
     private BottomAppBar bottomAppBar;
     private MenuItem deleteItem;
-
+    private ItemTouchHelper helper;
+    private static final int START_DELETE_SELECTION = 15;
+    private static final int END_DELETE_SELECTION = 17;
+    private int currentDelete = START_DELETE_SELECTION;
 
     public GridFragment() {
         // Required empty public constructor
@@ -72,19 +75,6 @@ public class GridFragment extends Fragment {
 
     public GridFragment(PhotoList photoList) {
         this.photoList = photoList;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.grid_menu, menu);
-        deleteItem = menu.findItem(R.id.delete_items);
-        deleteItem.setVisible(false);
     }
 
     @Override
@@ -110,66 +100,11 @@ public class GridFragment extends Fragment {
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        //startSelectionTracking();
+
+        startItemTouchHelper();
 
 
-        selectionTracker = new SelectionTracker.Builder<>(
-                "post-select",
-                recyclerView,
-                new PostKeyProvider(1, photoList),
-                new PostDetailsLookup(recyclerView),
-                StorageStrategy.createStringStorage()
-        ).withOnDragInitiatedListener(e -> {
-            Log.d(TAG, "onDragInitiated: ");
-            return true;
-        }).build();
-
-        adapter.setSelectionTracker(selectionTracker);
-
-        selectionTracker.addObserver(new SelectionTracker.SelectionObserver() {
-            @Override
-            public void onSelectionChanged() {
-                super.onSelectionChanged();
-                if (selectionTracker.hasSelection() && actionMode == null) {
-                    actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new ActionModeController(getContext(), selectionTracker));
-                    deleteItem.setVisible(true);
-                }
-                else if (!selectionTracker.hasSelection() && actionMode != null) {
-                    actionMode.finish();
-                    actionMode = null;
-                    deleteItem.setVisible(false);
-                } else {
-                    deleteItem.setVisible(true);
-                }
-                for (Post post : (Iterable<Post>) selectionTracker.getSelection()) {
-                    Log.d(TAG, "onSelectionChanged: " + post.getUri());
-                }
-            }
-        });
-/*
-        ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder dragged, @NonNull RecyclerView.ViewHolder target) {
-                int positionDragged = dragged.getAdapterPosition();
-                int positionTarget = target.getAdapterPosition();
-
-                photoList.swapPhotos(positionDragged, positionTarget);
-
-                adapter.notifyItemMoved(positionDragged, positionTarget);
-
-                return false;
-            }
-
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
-            }
-        });
-
-        helper.attachToRecyclerView(recyclerView);
-
-
-*/
         // set hiding and showing of fab
         Log.d(TAG, "onCreateView: " + bottomAppBar.getHideOnScroll());
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -195,27 +130,46 @@ public class GridFragment extends Fragment {
         return view;
     }
 
-    /**
-     * save photos from grid to shared preferences
-     */
-    private void savePhotos() {
-        getActivity();
-        sharedPreferences = getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(photoList);
-        editor.putString("Photos", json);
-        Log.d(TAG, "savePhotos: saved");
-        editor.apply();
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            selectionTracker.onRestoreInstanceState(savedInstanceState);
+        }
+        setHasOptionsMenu(true);
     }
 
-    /**
-     * open gallery through intent to pick an image
-     */
-    private void openGallery() {
-        Intent gallery = new Intent(Intent.ACTION_PICK);
-        gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-        startActivityForResult(gallery, PICK_IMAGE);
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.grid_menu, menu);
+        deleteItem = menu.findItem(R.id.delete_items);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (item.getItemId() == R.id.delete_items) {
+
+            if (currentDelete == START_DELETE_SELECTION) {
+                helper = null;
+                currentDelete = END_DELETE_SELECTION;
+                Toast.makeText(getContext(), "Select items then press delete again", Toast.LENGTH_SHORT ).show();
+                startSelectionTracking();
+            }
+
+            else if (currentDelete == END_DELETE_SELECTION) {
+                deletePosts();
+                selectionTracker.clearSelection();
+                selectionTracker = null;
+                startItemTouchHelper();
+                currentDelete = START_DELETE_SELECTION;
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     @Override
@@ -247,6 +201,111 @@ public class GridFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        selectionTracker.onSaveInstanceState(outState);
+        if (selectionTracker != null)
+            selectionTracker.onSaveInstanceState(outState);
     }
+
+
+
+    /**
+     * start item touch helper to switch items
+     */
+    public void startItemTouchHelper() {
+
+         helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder dragged, @NonNull RecyclerView.ViewHolder target) {
+                int positionDragged = dragged.getAdapterPosition();
+                int positionTarget = target.getAdapterPosition();
+
+                photoList.swapPhotos(positionDragged, positionTarget);
+
+                adapter.notifyItemMoved(positionDragged, positionTarget);
+
+                savePhotos();
+
+                return false;
+            }
+
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+        });
+
+        helper.attachToRecyclerView(recyclerView);
+
+    }
+
+    /**
+     * start selection to delete
+     */
+    public void startSelectionTracking() {
+
+        selectionTracker = new SelectionTracker.Builder<>(
+                "post-select",
+                recyclerView,
+                new PostKeyProvider(1, photoList),
+                new PostDetailsLookup(recyclerView),
+                StorageStrategy.createStringStorage()
+        ).withOnDragInitiatedListener(e -> {
+            Log.d(TAG, "onDragInitiated: ");
+            return true;
+        }).build();
+
+        adapter.setSelectionTracker(selectionTracker);
+
+
+    }
+
+    public void deletePosts() {
+        // delete items
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver() {
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+                if (selectionTracker.hasSelection() && actionMode == null) {
+                    actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new ActionModeController(getContext(), selectionTracker));
+                }
+                else if (!selectionTracker.hasSelection() && actionMode != null) {
+                    actionMode.finish();
+                    actionMode = null;
+                }
+                for (Post post : (Iterable<Post>) selectionTracker.getSelection()) {
+                    Log.d(TAG, "onSelectionChanged: " + post.getUri());
+                    photoList.removePhoto(post);
+                }
+            }
+        });
+
+        savePhotos();
+
+    }
+
+
+    /**
+     * save photos from grid to shared preferences
+     */
+    private void savePhotos() {
+        getActivity();
+        sharedPreferences = getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(photoList);
+        editor.putString("Photos", json);
+        Log.d(TAG, "savePhotos: saved");
+        editor.apply();
+    }
+
+    /**
+     * open gallery through intent to pick an image
+     */
+    private void openGallery() {
+        Intent gallery = new Intent(Intent.ACTION_PICK);
+        gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+        startActivityForResult(gallery, PICK_IMAGE);
+    }
+
+
 }
