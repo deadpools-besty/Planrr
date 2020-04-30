@@ -9,4 +9,11 @@
         android:icon="@drawable/ic_delete_black_24dp"
         />
 
+    <item
+        android:id="@+id/stop_selection"
+        android:title="Stop"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_stop_black_24dp"
+        />
+
 </menu>

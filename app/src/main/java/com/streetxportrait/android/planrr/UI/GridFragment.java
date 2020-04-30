@@ -4,69 +4,57 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ActionMode;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.selection.OnDragInitiatedListener;
-import androidx.recyclerview.selection.SelectionTracker;
-import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.play.core.assetpacks.as;
 import com.google.gson.Gson;
 import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
-import com.streetxportrait.android.planrr.Util.ActionModeController;
 import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
-import com.streetxportrait.android.planrr.Util.PostDetailsLookup;
-import com.streetxportrait.android.planrr.Util.PostKeyProvider;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
 
 
-public class GridFragment extends Fragment {
+public class GridFragment extends Fragment implements PhotoListAdapter.OnItemClickListener {
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private PhotoListAdapter adapter;
-    private int editItemPosition;
-    private static final String TAG = "Main-Activity";
+    private static final String TAG = "Grid-fragments";
     private static final int PICK_IMAGE = 100;
     private FloatingActionButton fab;
     private PhotoList photoList;
     private SharedPreferences sharedPreferences;
-    private SelectionTracker selectionTracker;
-    private ActionMode actionMode;
     private BottomAppBar bottomAppBar;
     private MenuItem deleteItem;
+    private MenuItem stopDelete;
     private ItemTouchHelper helper;
-    private static final int START_DELETE_SELECTION = 15;
-    private static final int END_DELETE_SELECTION = 17;
-    private int currentDelete = START_DELETE_SELECTION;
+    private static final int START_DELETE = 21;
+    private static final int END_DELETE = 22;
+    private int currDelete = END_DELETE;
+    Button test;
+
 
     public GridFragment() {
         // Required empty public constructor
@@ -81,15 +69,13 @@ public class GridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if (savedInstanceState != null) {
-            selectionTracker.onRestoreInstanceState(savedInstanceState);
-        }
 
         View view = inflater.inflate(R.layout.activity_main, container, false);
 
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
         bottomAppBar = view.findViewById(R.id.bottom_app_bar);
+        // test = view.findViewById(R.id.test_button);
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(bottomAppBar);
 
@@ -100,10 +86,9 @@ public class GridFragment extends Fragment {
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        //startSelectionTracking();
-
+        //testWhatever();
+        adapter.setOnItemClickListener(this);
         startItemTouchHelper();
-
 
         // set hiding and showing of fab
         Log.d(TAG, "onCreateView: " + bottomAppBar.getHideOnScroll());
@@ -119,13 +104,6 @@ public class GridFragment extends Fragment {
             }
         });
 
-/*
-        adapter.setOnItemClickListener(position -> {
-            photoList.removePhoto(position);
-            adapter.notifyDataSetChanged();
-            savePhotos();
-        });
-*/
 
         return view;
     }
@@ -133,10 +111,6 @@ public class GridFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            selectionTracker.onRestoreInstanceState(savedInstanceState);
-        }
         setHasOptionsMenu(true);
     }
 
@@ -144,32 +118,70 @@ public class GridFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.grid_menu, menu);
         deleteItem = menu.findItem(R.id.delete_items);
+        stopDelete = menu.findItem(R.id.stop_selection);
+        stopDelete.setVisible(false);
+    }
+
+    private void delete(int position) {
+
+        Log.d(TAG, "delete: " + position);
+        photoList.removePhoto(position);
+        adapter.notifyDataSetChanged();
+        savePhotos();
+
+    }
+
+    private void testWhatever() {
+
+
+        AsyncTask.execute(() -> {
+            while (true) {
+                Log.d(TAG, "testWhatever: Current: " + currDelete);
+
+                if (currDelete == START_DELETE) {
+                    adapter.setOnItemClickListener(this);
+                    Log.d(TAG, "testWhatever: start-" + adapter.getListener());
+                }
+                else if (currDelete == END_DELETE) {
+                    adapter.setOnItemClickListener(null);
+                    Log.d(TAG, "testWhatever: stop-" + adapter.getListener());
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        if (item.getItemId() == R.id.delete_items) {
+        switch(item.getItemId()) {
 
-            if (currentDelete == START_DELETE_SELECTION) {
-                helper = null;
-                currentDelete = END_DELETE_SELECTION;
-                Toast.makeText(getContext(), "Select items then press delete again", Toast.LENGTH_SHORT ).show();
-                startSelectionTracking();
-            }
+            case R.id.delete_items:
+                Toast.makeText(getContext(), "Tap an image to delete it", Toast.LENGTH_SHORT).show();
 
-            else if (currentDelete == END_DELETE_SELECTION) {
-                deletePosts();
-                selectionTracker.clearSelection();
-                selectionTracker = null;
-                startItemTouchHelper();
-                currentDelete = START_DELETE_SELECTION;
-            }
-            return true;
+                //adapter.setOnItemClickListener(this::delete);
+                currDelete = START_DELETE;
+                deleteItem.setVisible(false);
+                stopDelete.setVisible(true);
+                return true;
+
+            case R.id.stop_selection:
+
+                //adapter.setOnItemClickListener(null);
+                currDelete = END_DELETE;
+                stopDelete.setVisible(false);
+                deleteItem.setVisible(true);
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        else {
-            return false;
-        }
+
     }
 
     @Override
@@ -198,19 +210,11 @@ public class GridFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (selectionTracker != null)
-            selectionTracker.onSaveInstanceState(outState);
-    }
-
-
 
     /**
      * start item touch helper to switch items
      */
-    public void startItemTouchHelper() {
+    private void startItemTouchHelper() {
 
          helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
             @Override
@@ -239,52 +243,6 @@ public class GridFragment extends Fragment {
     }
 
     /**
-     * start selection to delete
-     */
-    public void startSelectionTracking() {
-
-        selectionTracker = new SelectionTracker.Builder<>(
-                "post-select",
-                recyclerView,
-                new PostKeyProvider(1, photoList),
-                new PostDetailsLookup(recyclerView),
-                StorageStrategy.createStringStorage()
-        ).withOnDragInitiatedListener(e -> {
-            Log.d(TAG, "onDragInitiated: ");
-            return true;
-        }).build();
-
-        adapter.setSelectionTracker(selectionTracker);
-
-
-    }
-
-    public void deletePosts() {
-        // delete items
-        selectionTracker.addObserver(new SelectionTracker.SelectionObserver() {
-            @Override
-            public void onSelectionChanged() {
-                super.onSelectionChanged();
-                if (selectionTracker.hasSelection() && actionMode == null) {
-                    actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new ActionModeController(getContext(), selectionTracker));
-                }
-                else if (!selectionTracker.hasSelection() && actionMode != null) {
-                    actionMode.finish();
-                    actionMode = null;
-                }
-                for (Post post : (Iterable<Post>) selectionTracker.getSelection()) {
-                    Log.d(TAG, "onSelectionChanged: " + post.getUri());
-                    photoList.removePhoto(post);
-                }
-            }
-        });
-
-        savePhotos();
-
-    }
-
-
-    /**
      * save photos from grid to shared preferences
      */
     private void savePhotos() {
@@ -308,4 +266,8 @@ public class GridFragment extends Fragment {
     }
 
 
+    @Override
+    public void onItemClick(int position) {
+        delete(position);
+    }
 }

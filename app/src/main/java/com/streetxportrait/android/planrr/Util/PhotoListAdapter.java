@@ -6,8 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.selection.ItemDetailsLookup;
-import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -22,25 +20,23 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
     private PhotoList photoList;
     private OnItemClickListener listener;
     private static final String TAG = "Adapter";
-    private SelectionTracker selectionTracker;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
 
     }
 
-    public void setSelectionTracker(SelectionTracker selectionTracker) {
-        this.selectionTracker = selectionTracker;
-    }
-
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public OnItemClickListener getListener() {
+        return listener;
     }
 
     public PhotoListAdapter(Context context, PhotoList photoList) {
         this.context = context;
         this.photoList = photoList;
-
     }
 
     @NonNull
@@ -55,7 +51,6 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
     public void onBindViewHolder(@NonNull PhotoListAdapter.PhotoListViewHolder holder, int position) {
 
         Post post = photoList.getPhoto(position);
-//        holder.bind(post, selectionTracker.isSelected(post));
         Glide.with(context)
                 .load(post.getUri())
                 .centerCrop()
@@ -88,13 +83,5 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
             });
         }
 
-        public ItemDetailsLookup.ItemDetails getItemDetails() {
-            return new PostItemDetails(getAdapterPosition(), photoList.getPhoto(getAdapterPosition()));
-        }
-
-        public void bind(Post post, boolean selected) {
-
-            itemView.setActivated(selected);
-        }
     }
 }
