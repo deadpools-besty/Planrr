@@ -5,4 +5,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="image_to_be_edited">image to be edited</string>
     <string name="save_icon">Save icon</string>
+    <string name="add_a_photo">Press add to add a photo</string>
 </resources>

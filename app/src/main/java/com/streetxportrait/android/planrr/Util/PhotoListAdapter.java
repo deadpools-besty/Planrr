@@ -44,7 +44,7 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
     public PhotoListAdapter.PhotoListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.plan_view_content, null);
-        return new PhotoListViewHolder(view, listener);
+        return new PhotoListViewHolder(view);
     }
 
     @Override
@@ -55,6 +55,14 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
                 .load(post.getUri())
                 .centerCrop()
                 .into(holder.imageView);
+
+        holder.imageView.setOnClickListener(v -> {
+            if (listener != null) {
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(position);
+                }
+            }
+        });
 
     }
 
@@ -67,20 +75,11 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
 
         SquareImageView imageView;
 
-        public PhotoListViewHolder (@NonNull View itemView, OnItemClickListener listener) {
+        public PhotoListViewHolder (@NonNull View itemView) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.image);
 
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-
-                        listener.onItemClick(position);
-                    }
-                }
-            });
         }
 
     }

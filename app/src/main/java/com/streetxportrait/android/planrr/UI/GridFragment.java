@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -14,7 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -50,11 +50,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
     private MenuItem deleteItem;
     private MenuItem stopDelete;
     private ItemTouchHelper helper;
-    private static final int START_DELETE = 21;
-    private static final int END_DELETE = 22;
-    private int currDelete = END_DELETE;
-    Button test;
-
+    private TextView addPhotoTV;
 
     public GridFragment() {
         // Required empty public constructor
@@ -70,12 +66,13 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
                              Bundle savedInstanceState) {
 
 
-        View view = inflater.inflate(R.layout.activity_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
         bottomAppBar = view.findViewById(R.id.bottom_app_bar);
-        // test = view.findViewById(R.id.test_button);
+        addPhotoTV = view.findViewById(R.id.add_photo_tv);
+        showAddTV();
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(bottomAppBar);
 
@@ -86,8 +83,8 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        //testWhatever();
-        adapter.setOnItemClickListener(this);
+
+        // allow swiping to rearrange pictures
         startItemTouchHelper();
 
         // set hiding and showing of fab
@@ -122,38 +119,26 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         stopDelete.setVisible(false);
     }
 
+    /**
+     * method to delete post in photo list
+     * @param position where the post is in the photoList
+     */
     private void delete(int position) {
 
         Log.d(TAG, "delete: " + position);
         photoList.removePhoto(position);
         adapter.notifyDataSetChanged();
         savePhotos();
-
     }
 
-    private void testWhatever() {
-
-
-        AsyncTask.execute(() -> {
-            while (true) {
-                Log.d(TAG, "testWhatever: Current: " + currDelete);
-
-                if (currDelete == START_DELETE) {
-                    adapter.setOnItemClickListener(this);
-                    Log.d(TAG, "testWhatever: start-" + adapter.getListener());
-                }
-                else if (currDelete == END_DELETE) {
-                    adapter.setOnItemClickListener(null);
-                    Log.d(TAG, "testWhatever: stop-" + adapter.getListener());
-                }
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    /**
+     * method for showing the text to prompting user to add a photo
+     */
+    private void showAddTV() {
+        if (photoList.getSize() == 0) {
+            addPhotoTV.setVisibility(View.VISIBLE);
+        }
+        else addPhotoTV.setVisibility((View.INVISIBLE));
     }
 
     @Override
@@ -162,18 +147,21 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         switch(item.getItemId()) {
 
             case R.id.delete_items:
-                Toast.makeText(getContext(), "Tap an image to delete it", Toast.LENGTH_SHORT).show();
-
-                //adapter.setOnItemClickListener(this::delete);
-                currDelete = START_DELETE;
+                Toast.makeText(getContext(), "Tap an image to delete it and press stop to return to normal", Toast.LENGTH_SHORT).show();
+                adapter.setOnItemClickListener(this);
+                helper = null;
+                Log.d(TAG, "start-" + adapter.getListener());
+                bottomAppBar.setBackgroundTint(ColorStateList.valueOf(getResources().getColor(R.color.secondaryDarkColor)));
                 deleteItem.setVisible(false);
                 stopDelete.setVisible(true);
                 return true;
 
             case R.id.stop_selection:
 
-                //adapter.setOnItemClickListener(null);
-                currDelete = END_DELETE;
+                adapter.setOnItemClickListener(null);
+                startItemTouchHelper();
+                Log.d(TAG, "stop-" + adapter.getListener());
+                bottomAppBar.setBackgroundTint(ColorStateList.valueOf(getResources().getColor(R.color.primaryColor)));
                 stopDelete.setVisible(false);
                 deleteItem.setVisible(true);
 
@@ -247,6 +235,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
      */
     private void savePhotos() {
         getActivity();
+        showAddTV();
         sharedPreferences = getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
