@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -19,13 +18,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.streetxportrait.android.planrr.Model.PhotoList;
@@ -46,7 +43,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
     private FloatingActionButton fab;
     private PhotoList photoList;
     private SharedPreferences sharedPreferences;
-    private BottomAppBar bottomAppBar;
     private MenuItem deleteItem;
     private MenuItem stopDelete;
     private ItemTouchHelper helper;
@@ -70,11 +66,9 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
-        bottomAppBar = view.findViewById(R.id.bottom_app_bar);
         addPhotoTV = view.findViewById(R.id.add_photo_tv);
         showAddTV();
 
-        ((AppCompatActivity) getActivity()).setSupportActionBar(bottomAppBar);
 
         fab.setOnClickListener(v -> openGallery());
 
@@ -88,7 +82,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         startItemTouchHelper();
 
         // set hiding and showing of fab
-        Log.d(TAG, "onCreateView: " + bottomAppBar.getHideOnScroll());
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -151,7 +144,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
                 adapter.setOnItemClickListener(this);
                 helper = null;
                 Log.d(TAG, "start-" + adapter.getListener());
-                bottomAppBar.setBackgroundTint(ColorStateList.valueOf(getResources().getColor(R.color.secondaryDarkColor)));
                 deleteItem.setVisible(false);
                 stopDelete.setVisible(true);
                 return true;
@@ -161,7 +153,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
                 adapter.setOnItemClickListener(null);
                 startItemTouchHelper();
                 Log.d(TAG, "stop-" + adapter.getListener());
-                bottomAppBar.setBackgroundTint(ColorStateList.valueOf(getResources().getColor(R.color.primaryColor)));
                 stopDelete.setVisible(false);
                 deleteItem.setVisible(true);
 

@@ -9,11 +9,15 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
@@ -39,18 +43,51 @@ public class EditFragment extends Fragment {
     private Post photo;
     private Bitmap originalBitmap;
     private Bitmap finalBitmap;
-    private Button saveButton;
     private Bitmap originalScaledBitmap;
     private static final int ORGINAL_SHOWING = 1;
     private static final int BORDERED_SHOWING = 0;
     private int IMAGE_SHOWING = BORDERED_SHOWING;
     private Bitmap finalScaledBitmap;
+    private MenuItem saveMenuItem;
+    private TextView addPhotoTV;
+    private boolean validImage = false;
 
 
     public EditFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.edit_menu, menu);
+        saveMenuItem = menu.findItem(R.id.save_image);
+        if (!validImage) {
+            saveMenuItem.setVisible(false);
+        }
+        else saveMenuItem.setVisible(true);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.save_image:
+                photo.saveBitmap(finalBitmap, getContext());
+                Toast.makeText(getContext(), "Photo saved!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onActivityResult: saved");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,12 +97,12 @@ public class EditFragment extends Fragment {
 
         floatingActionButton = view.findViewById(R.id.edit_fab);
         imageView = view.findViewById(R.id.edit_bitmap);
+        addPhotoTV = view.findViewById(R.id.edit_add_photo_tv);
+
 
         floatingActionButton.setOnClickListener(v -> {
             openGallery();
         });
-        saveButton = view.findViewById(R.id.save_button);
-
 
         return view;
     }
@@ -97,7 +134,7 @@ public class EditFragment extends Fragment {
         Log.d(TAG, "handle image: " + uri);
         photo = new Post(uri);
 
-        boolean validImage = false;
+
         try {
             validImage = photo.checkIsImage(this.getContext(), uri);
         } catch (IOException e) {
@@ -105,13 +142,8 @@ public class EditFragment extends Fragment {
         }
 
         if (validImage) {
-            saveButton.setVisibility(View.VISIBLE);
-            saveButton.setOnClickListener(v -> {
-                photo.saveBitmap(finalBitmap, getContext());
-                Log.d(TAG, "onActivityResult: saved");
-
-            });
-
+            saveMenuItem.setVisible(true);
+            addPhotoTV.setVisibility((View.INVISIBLE));
             try {
                 originalBitmap = photo.createBitmap(getContext());
                 finalBitmap = photo.getBitmapWithBorder();

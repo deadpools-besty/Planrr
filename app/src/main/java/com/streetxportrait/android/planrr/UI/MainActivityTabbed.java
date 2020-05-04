@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +40,7 @@ public class MainActivityTabbed extends AppCompatActivity {
     private PhotoList photoList;
     private static final int WRITE_STORAGE_PERMISSION_RC = 21;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +50,9 @@ public class MainActivityTabbed extends AppCompatActivity {
 
         viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tab_layout);
+        toolbar = findViewById(R.id.toolbar);
 
+        setSupportActionBar(toolbar);
 
         gridFragment = new GridFragment(photoList);
         editFragment = new EditFragment();
@@ -59,6 +63,25 @@ public class MainActivityTabbed extends AppCompatActivity {
         viewPagerAdapter.addFragment(gridFragment, "Grid");
         viewPagerAdapter.addFragment(editFragment, "Edit");
         viewPager.setAdapter(viewPagerAdapter);
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+               invalidateOptionsMenu();
+               Log.d(TAG, "onActivityResult: " + getSupportActionBar());
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_grid_on_black_24dp);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_edit_black_24dp);
