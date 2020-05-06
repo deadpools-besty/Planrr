@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/offWhiteColor"
     tools:context=".UI.EditFragment">
 
     <TextView
@@ -19,14 +20,10 @@
         android:textStyle="italic"
         />
 
-
-
-    <com.github.chrisbanes.photoview.PhotoView
+    <ImageView
         android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="8dp"
-        android:background="@drawable/bg_rect"
         android:adjustViewBounds="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,6 +33,37 @@
         android:contentDescription="editing image" />
 
 
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/radioGroup"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_fab"
+        app:layout_constraintEnd_toStartOf="@+id/edit_fab"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="horizontal">
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/noBorderRadioButton"
+            android:text="No Border"/>
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/whiteRadioButton"
+            android:text="White"
+            />
+
+        <RadioButton
+            android:id="@+id/dominantRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dominant"
+            />
+
+
+    </RadioGroup>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/edit_fab"
