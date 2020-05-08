@@ -32,6 +32,7 @@ import com.streetxportrait.android.planrr.Model.ImageProcessor;
 import com.streetxportrait.android.planrr.R;
 
 import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -176,6 +177,7 @@ public class EditFragment extends Fragment {
 
         switch (checkedId) {
             case R.id.noBorderRadioButton:
+                imageView.setBackground(getResources().getDrawable(R.drawable.bg_rect));
                 Glide.with(this)
                         .load(originalScaledBitmap)
                         .into(imageView);
@@ -189,6 +191,7 @@ public class EditFragment extends Fragment {
                 return;
             case R.id.dominantRadioButton:
                 exportBitmap = dominantBitmap;
+                imageView.setBackground(getResources().getDrawable(R.drawable.bg_rect));
                 Glide.with(this)
                         .load(dominantScaledBitmap)
                         .fitCenter()
@@ -205,9 +208,14 @@ public class EditFragment extends Fragment {
         whiteBorderBitmap = imageProcessor.getBitmapWithBorder(Color.WHITE);
         originalScaledBitmap = imageProcessor.getScaledBitmap(originalBitmap);
         whiteBorderScaledBitmap = imageProcessor.getScaledBitmap(whiteBorderBitmap);
-        int dominantColor = imageProcessor.getDominant();
+        Map<String, Integer> swatches =  imageProcessor.getSwatches();
 
-        if (dominantColor != -1) {
+        Integer dominantColor = swatches.get("dominant");
+        Integer mutedColor = swatches.get("muted");
+        Integer vibrantColor = swatches.get("vibrant");
+
+
+        if (dominantColor != null) {
             dominantBitmap = imageProcessor.getBitmapWithBorder(dominantColor);
             dominantScaledBitmap = imageProcessor.getScaledBitmap(dominantBitmap);
         }

@@ -8,72 +8,88 @@
     tools:context=".UI.EditFragment">
 
     <TextView
+        android:id="@+id/edit_add_photo_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/add_a_photo"
-        android:id="@+id/edit_add_photo_tv"
         android:textSize="24sp"
         android:textStyle="italic"
-        />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:layout_margin="10dp"
+        android:id="@+id/edit_bitmap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:elevation="10dp"
+        android:background="@drawable/bg_rect"
         android:adjustViewBounds="true"
+        android:contentDescription="editing image"
+        app:layout_constraintBottom_toTopOf="@+id/horizontal_scrollview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/edit_fab"
-        android:id="@+id/edit_bitmap"
-        android:contentDescription="editing image" />
+        app:layout_constrainedHeight="true"
+        />
 
-
-    <RadioGroup
+    <HorizontalScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/radioGroup"
+        android:id="@+id/horizontal_scrollview"
         app:layout_constraintBottom_toBottomOf="@+id/edit_fab"
         app:layout_constraintEnd_toStartOf="@+id/edit_fab"
         app:layout_constraintStart_toStartOf="parent"
-        android:orientation="horizontal">
+        app:layout_constrainedWidth="true"
+        android:scrollbars="none"
 
-        <com.google.android.material.radiobutton.MaterialRadioButton
+        >
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/noBorderRadioButton"
-            android:text="No Border"/>
+            android:orientation="horizontal">
 
-        <com.google.android.material.radiobutton.MaterialRadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/whiteRadioButton"
-            android:text="White"
-            />
+            <RadioButton
+                android:id="@+id/noBorderRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="No Border" />
 
-        <RadioButton
-            android:id="@+id/dominantRadioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dominant"
-            />
+            <RadioButton
+                android:id="@+id/whiteRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/color_radio_button_bg"
+                android:button="@android:color/transparent" />
+
+            <RadioButton
+                android:id="@+id/dominantRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/color_radio_button_bg"
+                android:button="@android:color/transparent" />
+
+        </RadioGroup>
 
 
-    </RadioGroup>
+    </HorizontalScrollView>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/edit_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         android:layout_margin="16dp"
-        app:backgroundTint="@color/secondaryColor"
         android:src="@drawable/ic_add_black_24dp"
-        />
+        app:backgroundTint="@color/secondaryColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

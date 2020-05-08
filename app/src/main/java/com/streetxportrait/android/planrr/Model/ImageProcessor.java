@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ImageProcessor extends Post {
 
@@ -171,14 +173,40 @@ public class ImageProcessor extends Post {
     }
 
 
-    public int getDominant() {
+    public Map<String, Integer> getSwatches() {
+
+
         Palette p = Palette.from(bitmap).generate();
 
-        Palette.Swatch swatch = p.getDominantSwatch();
-        if (swatch != null) {
-            return swatch.getRgb();
+        Map<String, Integer> swatchMap = new HashMap<String, Integer>();
+
+
+        Palette.Swatch dominantSwatch = p.getDominantSwatch();
+        Palette.Swatch mutedSwatch = p.getMutedSwatch();
+        Palette.Swatch vibrantSwatch = p.getVibrantSwatch();
+
+        if (dominantSwatch != null) {
+            swatchMap.put("dominant", dominantSwatch.getRgb());
         }
-        else return -1;
+        else {
+            swatchMap.put("dominant", null);
+
+        }
+
+        if (mutedSwatch != null) {
+            swatchMap.put("muted", mutedSwatch.getRgb());
+        }
+        else {
+            swatchMap.put("muted", null);
+        }
+        if (vibrantSwatch != null) {
+            swatchMap.put("vibrant", vibrantSwatch.getRgb());
+        }
+        else {
+            swatchMap.put("vibrant", null);
+        }
+
+        return swatchMap;
     }
 
 }
