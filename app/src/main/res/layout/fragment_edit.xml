@@ -23,8 +23,7 @@
         android:id="@+id/edit_bitmap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="10dp"
-        android:background="@drawable/bg_rect"
+        android:layout_margin="5dp"
         android:adjustViewBounds="true"
         android:contentDescription="editing image"
         app:layout_constraintBottom_toTopOf="@+id/horizontal_scrollview"
@@ -57,24 +56,42 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                android:text="No Border" />
+                android:text="No Border"
+                android:background="?android:selectableItemBackground"/>
 
             <RadioButton
                 android:id="@+id/whiteRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                android:background="@drawable/color_radio_button_bg"
-                android:button="@android:color/transparent" />
+                android:text="White"
+                android:background="?android:selectableItemBackground"/>
 
             <RadioButton
                 android:id="@+id/dominantRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                android:background="@drawable/color_radio_button_bg"
-                android:button="@android:color/transparent" />
+                android:text="Dominant"
+                android:background="?android:selectableItemBackground"/>
 
+
+            <RadioButton
+                android:id="@+id/mutedRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Muted"
+                android:background="?android:selectableItemBackground"/>
+
+
+            <RadioButton
+                android:id="@+id/vibrantRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Vibrant"
+                android:background="?android:selectableItemBackground"/>
         </RadioGroup>
 
 

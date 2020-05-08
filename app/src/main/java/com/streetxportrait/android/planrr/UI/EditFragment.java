@@ -2,6 +2,7 @@ package com.streetxportrait.android.planrr.UI;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,11 +54,15 @@ public class EditFragment extends Fragment {
     private Bitmap exportBitmap;
     private Bitmap originalScaledBitmap;
     private Bitmap whiteBorderScaledBitmap;
+    private Bitmap mutedBitmap;
+    private Bitmap mutedScaledBitmap;
+    private Bitmap vibrantBitmap;
+    private Bitmap vibrantScaledBitmap;
     private MenuItem saveMenuItem;
     private TextView addPhotoTV;
     private boolean validImage = false;
     private RadioGroup radioGroup;
-    private MaterialRadioButton noBorderRadioButton, whiteBorderRadioButton, dominantBorderRadioButton;
+    private MaterialRadioButton noBorderRadioButton, whiteBorderRadioButton, dominantBorderRadioButton, mutedBorderRadioButton, vibrantBorderRadioButton;
 
 
 
@@ -110,6 +116,8 @@ public class EditFragment extends Fragment {
         dominantBorderRadioButton = view.findViewById(R.id.dominantRadioButton);
         whiteBorderRadioButton =  view.findViewById(R.id.whiteRadioButton);
         noBorderRadioButton = view.findViewById(R.id.noBorderRadioButton);
+        mutedBorderRadioButton = view.findViewById(R.id.mutedRadioButton);
+        vibrantBorderRadioButton = view.findViewById(R.id.vibrantRadioButton);
 
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> switchImages(checkedId));
@@ -177,7 +185,6 @@ public class EditFragment extends Fragment {
 
         switch (checkedId) {
             case R.id.noBorderRadioButton:
-                imageView.setBackground(getResources().getDrawable(R.drawable.bg_rect));
                 Glide.with(this)
                         .load(originalScaledBitmap)
                         .into(imageView);
@@ -191,12 +198,24 @@ public class EditFragment extends Fragment {
                 return;
             case R.id.dominantRadioButton:
                 exportBitmap = dominantBitmap;
-                imageView.setBackground(getResources().getDrawable(R.drawable.bg_rect));
                 Glide.with(this)
                         .load(dominantScaledBitmap)
                         .fitCenter()
                         .into(imageView);
-
+                return;
+            case R.id.mutedRadioButton:
+                exportBitmap = mutedBitmap;
+                Glide.with(this)
+                        .load(mutedScaledBitmap)
+                        .fitCenter()
+                        .into(imageView);
+                return;
+            case R.id.vibrantRadioButton:
+                exportBitmap = vibrantBitmap;
+                Glide.with(this)
+                        .load(vibrantScaledBitmap)
+                        .fitCenter()
+                        .into(imageView);
         }
 
     }
@@ -214,14 +233,49 @@ public class EditFragment extends Fragment {
         Integer mutedColor = swatches.get("muted");
         Integer vibrantColor = swatches.get("vibrant");
 
+        setButtonColor(Color.WHITE, whiteBorderRadioButton);
 
         if (dominantColor != null) {
             dominantBitmap = imageProcessor.getBitmapWithBorder(dominantColor);
             dominantScaledBitmap = imageProcessor.getScaledBitmap(dominantBitmap);
+            setButtonColor(dominantColor, dominantBorderRadioButton);
         }
         else {
             dominantBorderRadioButton.setVisibility(View.INVISIBLE);
         }
+
+        if (mutedColor != null) {
+            mutedBitmap = imageProcessor.getBitmapWithBorder(mutedColor);
+            mutedScaledBitmap = imageProcessor.getScaledBitmap(mutedBitmap);
+            setButtonColor(mutedColor, mutedBorderRadioButton);
+        }
+        else {
+            mutedBorderRadioButton.setVisibility(View.INVISIBLE);
+        }
+
+        if (vibrantColor != null) {
+            vibrantBitmap = imageProcessor.getBitmapWithBorder(vibrantColor);
+            vibrantScaledBitmap = imageProcessor.getScaledBitmap(vibrantBitmap);
+            setButtonColor(vibrantColor, vibrantBorderRadioButton);
+        }
+        else {
+            mutedBorderRadioButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    public void setButtonColor(Integer color, RadioButton button) {
+
+        ColorStateList colorStateList = new ColorStateList(
+                new int[][]{
+                        new int[]{android.R.attr.state_enabled} //enabled
+                },
+                new int[] {
+                        color
+                }
+        );
+        button.setButtonTintList(colorStateList);
+
+
     }
 
 }
