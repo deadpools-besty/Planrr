@@ -64,6 +64,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
         View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
+
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
         addPhotoTV = view.findViewById(R.id.add_photo_tv);
@@ -110,6 +111,13 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         deleteItem = menu.findItem(R.id.delete_items);
         stopDelete = menu.findItem(R.id.stop_selection);
         stopDelete.setVisible(false);
+    }
+
+    // stop deletion if user swipes away from fragment
+    @Override
+    public void onDestroyOptionsMenu() {
+        super.onDestroyOptionsMenu();
+        adapter.setOnItemClickListener(null);
     }
 
     /**

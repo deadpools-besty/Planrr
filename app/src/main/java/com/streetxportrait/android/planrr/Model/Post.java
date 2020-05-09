@@ -44,7 +44,8 @@ public class Post implements Serializable {
         if (type != null) {
             return  type.startsWith("image/");
         } else {
-            // try to decode as image (bounds only)
+            // try to decode as image (bounds only)3
+
             InputStream inputStream = null;
             try {
                 inputStream = contentResolver.openInputStream(uri);

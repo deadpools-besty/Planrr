@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +33,7 @@ import com.streetxportrait.android.planrr.Model.ImageProcessor;
 import com.streetxportrait.android.planrr.R;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -63,7 +63,8 @@ public class EditFragment extends Fragment {
     private boolean validImage = false;
     private RadioGroup radioGroup;
     private MaterialRadioButton noBorderRadioButton, whiteBorderRadioButton, dominantBorderRadioButton, mutedBorderRadioButton, vibrantBorderRadioButton;
-
+    private ArrayList<MaterialRadioButton> buttons = new ArrayList<>();
+    private ArrayList<Bitmap> bitmaps = new ArrayList<>();
 
 
     public EditFragment() {
@@ -113,11 +114,8 @@ public class EditFragment extends Fragment {
         addPhotoTV = view.findViewById(R.id.edit_add_photo_tv);
         radioGroup = view.findViewById(R.id.radioGroup);
         radioGroup.setVisibility(View.INVISIBLE);
-        dominantBorderRadioButton = view.findViewById(R.id.dominantRadioButton);
         whiteBorderRadioButton =  view.findViewById(R.id.whiteRadioButton);
         noBorderRadioButton = view.findViewById(R.id.noBorderRadioButton);
-        mutedBorderRadioButton = view.findViewById(R.id.mutedRadioButton);
-        vibrantBorderRadioButton = view.findViewById(R.id.vibrantRadioButton);
 
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> switchImages(checkedId));
@@ -153,6 +151,8 @@ public class EditFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void handleImageImport(Uri uri) {
+
+        cleanFragment();
         Log.d(TAG, "handle image: " + uri);
         imageProcessor = new ImageProcessor(uri);
 
@@ -181,41 +181,42 @@ public class EditFragment extends Fragment {
         }
     }
 
+
     private void switchImages(int checkedId) {
 
-        switch (checkedId) {
-            case R.id.noBorderRadioButton:
-                Glide.with(this)
-                        .load(originalScaledBitmap)
-                        .into(imageView);
-                return;
-            case R.id.whiteRadioButton:
-                exportBitmap = whiteBorderBitmap;
-                Glide.with(this)
-                        .load(whiteBorderScaledBitmap)
-                        .fitCenter()
-                        .into(imageView);
-                return;
-            case R.id.dominantRadioButton:
-                exportBitmap = dominantBitmap;
-                Glide.with(this)
-                        .load(dominantScaledBitmap)
-                        .fitCenter()
-                        .into(imageView);
-                return;
-            case R.id.mutedRadioButton:
-                exportBitmap = mutedBitmap;
-                Glide.with(this)
-                        .load(mutedScaledBitmap)
-                        .fitCenter()
-                        .into(imageView);
-                return;
-            case R.id.vibrantRadioButton:
-                exportBitmap = vibrantBitmap;
-                Glide.with(this)
-                        .load(vibrantScaledBitmap)
-                        .fitCenter()
-                        .into(imageView);
+        if (checkedId == noBorderRadioButton.getId()) {
+            Glide.with(this)
+                    .load(originalScaledBitmap)
+                    .into(imageView);
+
+        }
+        else if (checkedId == whiteBorderRadioButton.getId()) {
+            exportBitmap = whiteBorderBitmap;
+            Glide.with(this)
+                    .load(whiteBorderScaledBitmap)
+                    .fitCenter()
+                    .into(imageView);
+        }
+        else if(dominantBorderRadioButton != null && checkedId == dominantBorderRadioButton.getId()) {
+            exportBitmap = dominantBitmap;
+            Glide.with(this)
+                    .load(dominantScaledBitmap)
+                    .fitCenter()
+                    .into(imageView);
+        }
+        else if (mutedBorderRadioButton != null && checkedId == mutedBorderRadioButton.getId()) {
+            exportBitmap = mutedBitmap;
+            Glide.with(this)
+                    .load(mutedScaledBitmap)
+                    .fitCenter()
+                    .into(imageView);
+        }
+        else if (vibrantBorderRadioButton != null && checkedId == vibrantBorderRadioButton.getId()) {
+            exportBitmap = vibrantBitmap;
+            Glide.with(this)
+                    .load(vibrantScaledBitmap)
+                    .fitCenter()
+                    .into(imageView);
         }
 
     }
@@ -232,38 +233,51 @@ public class EditFragment extends Fragment {
         Integer dominantColor = swatches.get("dominant");
         Integer mutedColor = swatches.get("muted");
         Integer vibrantColor = swatches.get("vibrant");
-
-        setButtonColor(Color.WHITE, whiteBorderRadioButton);
-
+        Log.d(TAG, "createBitmaps: Dominant: " + dominantColor);
+        Log.d(TAG, "createBitmaps: Muted: " + mutedColor);
+        Log.d(TAG, "createBitmaps: Vibrant: " + vibrantColor);
         if (dominantColor != null) {
             dominantBitmap = imageProcessor.getBitmapWithBorder(dominantColor);
             dominantScaledBitmap = imageProcessor.getScaledBitmap(dominantBitmap);
+            dominantBorderRadioButton = addRadioButton("Dominant");
             setButtonColor(dominantColor, dominantBorderRadioButton);
-        }
-        else {
-            dominantBorderRadioButton.setVisibility(View.INVISIBLE);
+            bitmaps.add(dominantBitmap);
+            bitmaps.add(dominantScaledBitmap);
+            buttons.add(dominantBorderRadioButton);
         }
 
         if (mutedColor != null) {
             mutedBitmap = imageProcessor.getBitmapWithBorder(mutedColor);
             mutedScaledBitmap = imageProcessor.getScaledBitmap(mutedBitmap);
+            mutedBorderRadioButton = addRadioButton("Muted");
             setButtonColor(mutedColor, mutedBorderRadioButton);
-        }
-        else {
-            mutedBorderRadioButton.setVisibility(View.INVISIBLE);
+            bitmaps.add(mutedBitmap);
+            bitmaps.add(mutedScaledBitmap);
+            buttons.add(mutedBorderRadioButton);
         }
 
         if (vibrantColor != null) {
             vibrantBitmap = imageProcessor.getBitmapWithBorder(vibrantColor);
             vibrantScaledBitmap = imageProcessor.getScaledBitmap(vibrantBitmap);
+            vibrantBorderRadioButton = addRadioButton("Vibrant");
             setButtonColor(vibrantColor, vibrantBorderRadioButton);
-        }
-        else {
-            mutedBorderRadioButton.setVisibility(View.INVISIBLE);
+            bitmaps.add(vibrantBitmap );
+            bitmaps.add(vibrantScaledBitmap);
+            buttons.add(vibrantBorderRadioButton);
         }
     }
 
-    public void setButtonColor(Integer color, RadioButton button) {
+    private MaterialRadioButton addRadioButton(String text){
+        MaterialRadioButton button = new MaterialRadioButton(getContext());
+        button.setId(View.generateViewId());
+        button.setText(text);
+
+        RadioGroup.LayoutParams layoutParams= new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
+        radioGroup.addView(button, layoutParams) ;
+        return button;
+    }
+
+    private void setButtonColor(Integer color, MaterialRadioButton button) {
 
         ColorStateList colorStateList = new ColorStateList(
                 new int[][]{
@@ -274,7 +288,25 @@ public class EditFragment extends Fragment {
                 }
         );
         button.setButtonTintList(colorStateList);
+        button.invalidate();
+    }
 
+    public void cleanFragment() {
+
+        for (MaterialRadioButton button: buttons) {
+            if (button != null) {
+                Log.d(TAG, "cleanFragment: " + button);
+                radioGroup.removeView(button);
+                button = null;
+            }
+        }
+
+        for (Bitmap bitmap: bitmaps) {
+            if (bitmap != null) {
+                Log.d(TAG, "cleanFragment: " + bitmap);
+                bitmap = null;
+            }
+        }
 
     }
 

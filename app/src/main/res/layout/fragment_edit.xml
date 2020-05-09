@@ -49,49 +49,23 @@
             android:id="@+id/radioGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_margin="5dp">
 
             <RadioButton
                 android:id="@+id/noBorderRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
                 android:text="No Border"
-                android:background="?android:selectableItemBackground"/>
+                />
 
             <RadioButton
                 android:id="@+id/whiteRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
                 android:text="White"
-                android:background="?android:selectableItemBackground"/>
+                />
 
-            <RadioButton
-                android:id="@+id/dominantRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:text="Dominant"
-                android:background="?android:selectableItemBackground"/>
-
-
-            <RadioButton
-                android:id="@+id/mutedRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:text="Muted"
-                android:background="?android:selectableItemBackground"/>
-
-
-            <RadioButton
-                android:id="@+id/vibrantRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:text="Vibrant"
-                android:background="?android:selectableItemBackground"/>
         </RadioGroup>
 
 
@@ -102,7 +76,7 @@
         android:id="@+id/edit_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="20dp"
         android:src="@drawable/ic_add_black_24dp"
         app:backgroundTint="@color/secondaryColor"
         app:layout_constraintBottom_toBottomOf="parent"
