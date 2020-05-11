@@ -3,13 +3,17 @@ package com.streetxportrait.android.planrr.UI;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -27,8 +31,9 @@ import com.streetxportrait.android.planrr.R;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
-public class MainActivityTabbed extends AppCompatActivity {
+public class MainActivityTabbed extends AppCompatActivity implements ThemeSelectionDialog.OnFragmentInteractionListener{
 
     private static final String TAG = "Main-Tab";
     private Toolbar toolbar;
@@ -36,17 +41,30 @@ public class MainActivityTabbed extends AppCompatActivity {
     private TabLayout tabLayout;
     private GridFragment gridFragment;
     private EditFragment editFragment;
-    private SharedPreferences sharedPreferences;
-    private PhotoList photoList;
     private static final int WRITE_STORAGE_PERMISSION_RC = 21;
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_options_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.change_theme_options_menu:
+                ThemeSelectionDialog themeSelectionDialog = new ThemeSelectionDialog();
+                themeSelectionDialog.show(getSupportFragmentManager(), "theme");
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_RC);
         setContentView(R.layout.tabbed_main_activity);
-        getPhotos();
 
         viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tab_layout);
@@ -54,7 +72,7 @@ public class MainActivityTabbed extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
 
-        gridFragment = new GridFragment(photoList);
+        gridFragment = new GridFragment();
         editFragment = new EditFragment();
 
         tabLayout.setupWithViewPager(viewPager);
@@ -123,20 +141,20 @@ public class MainActivityTabbed extends AppCompatActivity {
 
     }
 
-    private void getPhotos() {
-        sharedPreferences = getSharedPreferences("key", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("Photos", null);
-        Type type = new TypeToken<PhotoList>(){}.getType();
+    @Override
+    public void onSetPressed(String finalChoice) {
+        Resources resources= getResources();
+        if (finalChoice.equals(resources.getString(R.string.light_theme))) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
 
-        photoList = gson.fromJson(json, type);
-
-        if (photoList == null) {
-            photoList = new PhotoList();
+        else if (finalChoice.equals(resources.getString(R.string.dark_theme))) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+        else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         }
     }
-
-
 
     private class ViewPagerAdapter extends FragmentPagerAdapter {
 

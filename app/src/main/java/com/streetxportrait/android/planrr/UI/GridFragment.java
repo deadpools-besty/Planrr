@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,12 +26,14 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
 import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 
 public class GridFragment extends Fragment implements PhotoListAdapter.OnItemClickListener {
@@ -54,8 +57,9 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
 
     public GridFragment(PhotoList photoList) {
-        this.photoList = photoList;
+
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,13 +68,10 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
         View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
-
+        getPhotos();
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
         addPhotoTV = view.findViewById(R.id.add_photo_tv);
-        showAddTV();
-
-
         fab.setOnClickListener(v -> openGallery());
 
         adapter = new PhotoListAdapter(getContext(), photoList);
@@ -78,7 +79,9 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        Log.d(TAG, "GridFragment: " + photoList);
 
+        showAddTV();
         // allow swiping to rearrange pictures
         startItemTouchHelper();
 
@@ -243,6 +246,24 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         Log.d(TAG, "savePhotos: saved");
         editor.apply();
     }
+
+
+    private void getPhotos() {
+        getActivity();
+        sharedPreferences = this.getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("Photos", null);
+        Type type = new TypeToken<PhotoList>(){}.getType();
+
+        photoList = gson.fromJson(json, type);
+
+        if (photoList == null) {
+            photoList = new PhotoList();
+        }
+    }
+
+
+
 
     /**
      * open gallery through intent to pick an image
