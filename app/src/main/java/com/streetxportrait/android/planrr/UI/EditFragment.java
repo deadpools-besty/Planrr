@@ -29,8 +29,8 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.radiobutton.MaterialRadioButton;
-import com.streetxportrait.android.planrr.Model.ImageProcessor;
 import com.streetxportrait.android.planrr.R;
+import com.streetxportrait.android.planrr.Util.ImageProcessor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,9 +42,9 @@ import java.util.Map;
  */
 public class EditFragment extends Fragment {
 
-    private ImageView imageView;
     private static final int PICK_IMAGE = 100;
     private static final String TAG = "Edit-Fragment";
+    private ImageView imageView;
     private FloatingActionButton floatingActionButton;
     private ImageProcessor imageProcessor;
     private Bitmap originalBitmap;

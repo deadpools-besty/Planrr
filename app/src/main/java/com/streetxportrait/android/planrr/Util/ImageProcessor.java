@@ -1,4 +1,4 @@
-package com.streetxportrait.android.planrr.Model;
+package com.streetxportrait.android.planrr.Util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +12,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.palette.graphics.Palette;
+
+import com.streetxportrait.android.planrr.Model.Post;
 
 import org.apache.commons.io.FilenameUtils;
 

@@ -1,9 +1,7 @@
 package com.streetxportrait.android.planrr.UI;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -18,38 +16,35 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
-import com.streetxportrait.android.planrr.Util.PhotoListAdapter;
+import com.streetxportrait.android.planrr.Util.SharedPrefManager;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 
 
 public class GridFragment extends Fragment implements PhotoListAdapter.OnItemClickListener {
 
+    private static final String TAG = "Grid-fragments";
+    private static final int PICK_IMAGE = 100;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private PhotoListAdapter adapter;
-    private static final String TAG = "Grid-fragments";
-    private static final int PICK_IMAGE = 100;
     private FloatingActionButton fab;
     private PhotoList photoList;
-    private SharedPreferences sharedPreferences;
     private MenuItem deleteItem;
     private MenuItem stopDelete;
     private ItemTouchHelper helper;
     private TextView addPhotoTV;
+    private SharedPrefManager sharedPrefManager;
+    private String currentTheme;
 
     public GridFragment() {
         // Required empty public constructor
@@ -67,8 +62,9 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
 
         View view = inflater.inflate(R.layout.fragment_grid, container, false);
+        sharedPrefManager = new SharedPrefManager(getContext());
 
-        getPhotos();
+        photoList = sharedPrefManager.loadPhotos();
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
         addPhotoTV = view.findViewById(R.id.add_photo_tv);
@@ -79,7 +75,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        Log.d(TAG, "GridFragment: " + photoList);
 
         showAddTV();
         // allow swiping to rearrange pictures
@@ -132,7 +127,8 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         Log.d(TAG, "delete: " + position);
         photoList.removePhoto(position);
         adapter.notifyDataSetChanged();
-        savePhotos();
+        sharedPrefManager.savePhotos(photoList);
+        //savePhotos();
     }
 
     /**
@@ -154,7 +150,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
                 Toast.makeText(getContext(), "Tap an image to delete it and press stop to return to normal", Toast.LENGTH_SHORT).show();
                 adapter.setOnItemClickListener(this);
                 helper = null;
-                Log.d(TAG, "start-" + adapter.getListener());
                 deleteItem.setVisible(false);
                 stopDelete.setVisible(true);
                 return true;
@@ -163,7 +158,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
                 adapter.setOnItemClickListener(null);
                 startItemTouchHelper();
-                Log.d(TAG, "stop-" + adapter.getListener());
                 stopDelete.setVisible(false);
                 deleteItem.setVisible(true);
 
@@ -190,7 +184,8 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
             if (validImage) {
                 photoList.addPhoto(post);
                 adapter.notifyDataSetChanged();
-                savePhotos();
+                sharedPrefManager.savePhotos(photoList);
+//                savePhotos();
             }
 
             else {
@@ -216,8 +211,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
                 adapter.notifyItemMoved(positionDragged, positionTarget);
 
-                savePhotos();
-
+                sharedPrefManager.savePhotos(photoList);
                 return false;
             }
 
@@ -231,37 +225,6 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         helper.attachToRecyclerView(recyclerView);
 
     }
-
-    /**
-     * save photos from grid to shared preferences
-     */
-    private void savePhotos() {
-        getActivity();
-        showAddTV();
-        sharedPreferences = getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(photoList);
-        editor.putString("Photos", json);
-        Log.d(TAG, "savePhotos: saved");
-        editor.apply();
-    }
-
-
-    private void getPhotos() {
-        getActivity();
-        sharedPreferences = this.getActivity().getSharedPreferences("key", Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("Photos", null);
-        Type type = new TypeToken<PhotoList>(){}.getType();
-
-        photoList = gson.fromJson(json, type);
-
-        if (photoList == null) {
-            photoList = new PhotoList();
-        }
-    }
-
 
 
 

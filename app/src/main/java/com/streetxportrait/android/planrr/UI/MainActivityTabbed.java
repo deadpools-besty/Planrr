@@ -1,7 +1,6 @@
 package com.streetxportrait.android.planrr.UI;
 
 import android.Manifest;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -17,31 +16,31 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.R;
+import com.streetxportrait.android.planrr.Util.SharedPrefManager;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 public class MainActivityTabbed extends AppCompatActivity implements ThemeSelectionDialog.OnFragmentInteractionListener{
 
     private static final String TAG = "Main-Tab";
+    private static final int WRITE_STORAGE_PERMISSION_RC = 21;
     private Toolbar toolbar;
     private ViewPager viewPager;
     private TabLayout tabLayout;
     private GridFragment gridFragment;
     private EditFragment editFragment;
-    private static final int WRITE_STORAGE_PERMISSION_RC = 21;
+    private String currentTheme;
+    private SharedPrefManager sharedPrefManager;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -53,9 +52,16 @@ public class MainActivityTabbed extends AppCompatActivity implements ThemeSelect
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.change_theme_options_menu:
-                ThemeSelectionDialog themeSelectionDialog = new ThemeSelectionDialog();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                DialogFragment fragment = ThemeSelectionDialog.newInstance(currentTheme);
+                fragmentTransaction.add(0, fragment);
+                fragmentTransaction.commit();
+
+                /*ThemeSelectionDialog themeSelectionDialog = new ThemeSelectionDialog();
                 themeSelectionDialog.show(getSupportFragmentManager(), "theme");
-        }
+        */}
 
         return super.onOptionsItemSelected(item);
     }
@@ -64,6 +70,10 @@ public class MainActivityTabbed extends AppCompatActivity implements ThemeSelect
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_RC);
+        sharedPrefManager = new SharedPrefManager(this);
+        currentTheme = sharedPrefManager.loadTheme();
+        Log.d(TAG, "onCreate: " + currentTheme);
+
         setContentView(R.layout.tabbed_main_activity);
 
         viewPager = findViewById(R.id.view_pager);
