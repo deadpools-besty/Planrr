@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque">
+
+    <item android:drawable="@color/colorBackground"
+        />
+
+    <item android:gravity="center"
+        android:width="300dp"
+        android:height="300dp">
+        <bitmap android:src="@drawable/planrr_splash_icon"
+            android:gravity="fill"/>
+    </item>
+
+</layer-list>

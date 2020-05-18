@@ -68,6 +68,7 @@ public class MainActivityTabbed extends AppCompatActivity implements ThemeSelect
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_RC);
         sharedPrefManager = new SharedPrefManager(this);
