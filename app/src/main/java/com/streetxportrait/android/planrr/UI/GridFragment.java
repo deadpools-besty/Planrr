@@ -127,6 +127,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         Log.d(TAG, "delete: " + position);
         photoList.removePhoto(position);
         adapter.notifyDataSetChanged();
+        showAddTV();
         sharedPrefManager.savePhotos(photoList);
         //savePhotos();
     }
@@ -185,7 +186,8 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
                 photoList.addPhoto(post);
                 adapter.notifyDataSetChanged();
                 sharedPrefManager.savePhotos(photoList);
-//                savePhotos();
+                showAddTV();
+//              savePhotos();
             }
 
             else {
