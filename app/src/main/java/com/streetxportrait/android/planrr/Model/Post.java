@@ -14,7 +14,33 @@ public class Post implements Serializable {
     private String uri;
     private final static String TAG = "Post";
     private boolean isSelected = false;
+    private String postDate;
+    private String postTime;
+    private String postCaption;
 
+    public String getPostDate() {
+        return postDate;
+    }
+
+    public void setPostDate(String postDate) {
+        this.postDate = postDate;
+    }
+
+    public String getPostTime() {
+        return postTime;
+    }
+
+    public void setPostTime(String postTime) {
+        this.postTime = postTime;
+    }
+
+    public String getPostCaption() {
+        return postCaption;
+    }
+
+    public void setPostCaption(String postCaption) {
+        this.postCaption = postCaption;
+    }
 
     public Post(Uri uri) {
         this.uri = uri.toString();
