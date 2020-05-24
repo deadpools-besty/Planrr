@@ -61,6 +61,7 @@ public class EditFragment extends Fragment {
     private MenuItem saveMenuItem;
     private TextView addPhotoTV;
     private boolean validImage = false;
+    private static final int WRITE_STORAGE_PERMISSION_RC = 21;
     private RadioGroup radioGroup;
     private MaterialRadioButton noBorderRadioButton, whiteBorderRadioButton, dominantBorderRadioButton, mutedBorderRadioButton, vibrantBorderRadioButton;
     private ArrayList<MaterialRadioButton> buttons = new ArrayList<>();

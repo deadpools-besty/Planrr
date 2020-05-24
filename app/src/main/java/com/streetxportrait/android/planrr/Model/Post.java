@@ -58,7 +58,7 @@ public class Post implements Serializable {
             } catch (IOException e) {
                 // ignore
             } finally {
-                inputStream.close();
+                if (inputStream != null) inputStream.close();
             }
         }
         // default outcome if image not confirmed

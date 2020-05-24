@@ -115,7 +115,7 @@ public class MainActivityTabbed extends AppCompatActivity {
             }
             else {
                 Toast.makeText(MainActivityTabbed.this,
-                        "Writing Permission Denied",
+                        "Enable storage permission to add and save photos",
                         Toast.LENGTH_SHORT)
                         .show();
             }

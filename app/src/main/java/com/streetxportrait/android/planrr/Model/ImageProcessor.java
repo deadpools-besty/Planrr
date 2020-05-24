@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.palette.graphics.Palette;
@@ -166,7 +167,10 @@ public class ImageProcessor extends Post {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.flush();
             out.close();
+            Toast.makeText(context, "Photo saved!", Toast.LENGTH_SHORT).show();
+
         } catch (IOException e) {
+            Toast.makeText(context, "Save unsuccessful, check storage permission", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "saveBitmap: " + e);
             e.printStackTrace();
         }
