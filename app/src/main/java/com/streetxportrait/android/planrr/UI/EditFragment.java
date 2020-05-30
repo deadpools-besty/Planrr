@@ -174,6 +174,7 @@ public class EditFragment extends Fragment {
                 Log.d(TAG, "handleImageImport: " + e);
             }
 
+            radioGroup.clearCheck();
             radioGroup.check(whiteBorderRadioButton.getId());
 
         }
