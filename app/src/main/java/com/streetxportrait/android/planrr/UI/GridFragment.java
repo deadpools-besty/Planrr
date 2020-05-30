@@ -1,7 +1,9 @@
 package com.streetxportrait.android.planrr.UI;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -173,30 +175,49 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE){
-            Post post = new Post(data.getData());
 
-            boolean validImage = false;
-            try {
-                validImage = post.checkIsImage(this.getContext(), data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            if (data != null) {
+                ClipData clipData = data.getClipData();
 
-            if (validImage) {
-                photoList.addPhoto(post);
-                adapter.notifyDataSetChanged();
-                sharedPrefManager.savePhotos(photoList);
-                showAddTV();
-//              savePhotos();
-            }
+                if (clipData != null) {
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        ClipData.Item item = clipData.getItemAt(i);
+                        handleImageImport(item.getUri());
+                    }
+                }
 
-            else {
-                Toast.makeText(getContext(), "Selected file was not an image. Please select an image file", Toast.LENGTH_SHORT).show();
+                else {
+                    handleImageImport(data.getData());
+                }
             }
 
         }
     }
 
+    private void handleImageImport(Uri uri) {
+
+        Post post = new Post(uri);
+
+        boolean validImage = false;
+        try {
+            validImage = post.checkIsImage(this.getContext(), uri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (validImage) {
+            photoList.addPhoto(post);
+            adapter.notifyDataSetChanged();
+            sharedPrefManager.savePhotos(photoList);
+            showAddTV();
+//              savePhotos();
+        }
+
+        else {
+            Toast.makeText(getContext(), "" + uri.getLastPathSegment() + "was not an image. Please select an image file", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
     /**
      * start item touch helper to switch items
@@ -236,6 +257,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
     private void openGallery() {
         Intent gallery = new Intent(Intent.ACTION_PICK);
         gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+        gallery.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(gallery, PICK_IMAGE);
     }
 
