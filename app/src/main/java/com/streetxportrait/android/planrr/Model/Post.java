@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -21,6 +23,7 @@ public class Post implements Serializable {
     public String getPostDate() {
         return postDate;
     }
+
 
     public void setPostDate(String postDate) {
         this.postDate = postDate;
@@ -89,6 +92,10 @@ public class Post implements Serializable {
         }
         // default outcome if image not confirmed
         return false;
+    }
+
+    public String getFileName() {
+        return FilenameUtils.getBaseName(uri);
     }
 
 }

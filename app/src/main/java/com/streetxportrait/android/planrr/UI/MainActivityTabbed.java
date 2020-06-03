@@ -102,8 +102,6 @@ public class MainActivityTabbed extends AppCompatActivity implements ThemeSelect
             @Override
             public void onPageSelected(int position) {
                invalidateOptionsMenu();
-               Log.d(TAG, "onActivityResult: " + getSupportActionBar());
-
             }
 
             @Override

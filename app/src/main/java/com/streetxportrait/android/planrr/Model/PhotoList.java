@@ -1,11 +1,14 @@
 package com.streetxportrait.android.planrr.Model;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class PhotoList {
 
+    private static final String TAG = "Photo-list";
     private ArrayList<Post> mPosts;
 
 
@@ -27,6 +30,10 @@ public class PhotoList {
 
     public void addPhoto(Post post) {
         mPosts.add(0, post);
+    }
+
+    public void insertPhoto(Post post, int index) {
+        mPosts.add(index, post);
     }
 
     public void removePhoto(Post post) {

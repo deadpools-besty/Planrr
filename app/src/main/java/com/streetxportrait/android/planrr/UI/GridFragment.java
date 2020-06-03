@@ -18,12 +18,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.streetxportrait.android.planrr.Model.PhotoList;
 import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
@@ -31,8 +33,12 @@ import com.streetxportrait.android.planrr.Util.SharedPrefManager;
 
 import java.io.IOException;
 
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
+import jp.wasabeef.recyclerview.animators.ScaleInAnimator;
+import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
-public class GridFragment extends Fragment implements PhotoListAdapter.OnItemClickListener {
+
+public class GridFragment extends Fragment {
 
     private static final String TAG = "Grid-fragments";
     private static final int PICK_IMAGE = 100;
@@ -43,10 +49,12 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
     private PhotoList photoList;
     private MenuItem deleteItem;
     private MenuItem stopDelete;
+    private CoordinatorLayout coordinatorLayout;
     private ItemTouchHelper helper;
     private TextView addPhotoTV;
     private SharedPrefManager sharedPrefManager;
     private String currentTheme;
+    private Post lastDeleted;
 
     public GridFragment() {
         // Required empty public constructor
@@ -70,17 +78,17 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         fab = view.findViewById(R.id.fab);
         recyclerView = view.findViewById(R.id.recyclerView);
         addPhotoTV = view.findViewById(R.id.add_photo_tv);
+        coordinatorLayout = view.findViewById(R.id.coordinator);
         fab.setOnClickListener(v -> openGallery());
 
         adapter = new PhotoListAdapter(getContext(), photoList);
         recyclerView.setHasFixedSize(true);
         layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+//        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(new AlphaInAnimationAdapter(adapter));
 
         showAddTV();
-        // allow swiping to rearrange pictures
-        startItemTouchHelper();
 
         // set hiding and showing of fab
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -95,6 +103,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
             }
         });
 
+        recyclerView.setItemAnimator(new ScaleInAnimator());
 
         return view;
     }
@@ -126,12 +135,29 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
      */
     private void delete(int position) {
 
-        Log.d(TAG, "delete: " + position);
+        lastDeleted = photoList.getPhoto(position);
         photoList.removePhoto(position);
-        adapter.notifyDataSetChanged();
+        adapter.notifyItemRemoved(position);
         showAddTV();
         sharedPrefManager.savePhotos(photoList);
-        //savePhotos();
+        showDeleteSnackbar(lastDeleted, position);
+
+    }
+
+    private void showDeleteSnackbar(Post lastDeleted, int position) {
+
+        int finalPos = position + 1;
+        Snackbar snackbar = Snackbar.make(coordinatorLayout,"Post " + finalPos + " was deleted from grid", Snackbar.LENGTH_SHORT)
+                .setAction("UNDO", v -> {
+                    // reinsert photo into photo list notify adapter that photo has been reinserted and save list again
+                    photoList.insertPhoto(lastDeleted, position);
+                    adapter.notifyItemInserted(position);
+                    sharedPrefManager.savePhotos(photoList);
+                    Snackbar snackbar1 = Snackbar.make(coordinatorLayout, "Post Restored!", Snackbar.LENGTH_SHORT);
+                    snackbar1.show();
+                });
+        snackbar.show();
+
     }
 
     /**
@@ -150,9 +176,11 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
         switch(item.getItemId()) {
 
             case R.id.delete_items:
-                Toast.makeText(getContext(), "Tap an image to delete it and press stop to return to normal", Toast.LENGTH_SHORT).show();
-                adapter.setOnItemClickListener(this);
-                helper = null;
+                Toast.makeText(getContext(), "Tap a post to delete it, swipe on screen to rearrange posts.", Toast.LENGTH_SHORT).show();
+                adapter.setOnItemClickListener(this::delete);
+
+                // allow swiping to rearrange pictures
+                startItemTouchHelper();
                 deleteItem.setVisible(false);
                 stopDelete.setVisible(true);
                 return true;
@@ -160,7 +188,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
             case R.id.stop_selection:
 
                 adapter.setOnItemClickListener(null);
-                startItemTouchHelper();
+                helper.attachToRecyclerView(null);
                 stopDelete.setVisible(false);
                 deleteItem.setVisible(true);
 
@@ -207,7 +235,7 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
 
         if (validImage) {
             photoList.addPhoto(post);
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemInserted(0);
             sharedPrefManager.savePhotos(photoList);
             showAddTV();
 //              savePhotos();
@@ -262,8 +290,4 @@ public class GridFragment extends Fragment implements PhotoListAdapter.OnItemCli
     }
 
 
-    @Override
-    public void onItemClick(int position) {
-        delete(position);
-    }
 }
