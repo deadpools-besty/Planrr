@@ -67,7 +67,7 @@ public class ImageProcessor extends Post {
         float aspectRatio = srcWidth/ (float) srcHeight;
 
         if (srcWidth > LONG_EDGE_SIZE || srcHeight > LONG_EDGE_SIZE) {
-            Log.d(TAG, "getScaledBitmap: " + aspectRatio);
+//            Log.d(TAG, "getScaledBitmap: " + aspectRatio);
             int fHeight;
             int fWidth;
 
@@ -126,14 +126,14 @@ public class ImageProcessor extends Post {
             top = 0;
         }
 
-        Log.d(TAG, "getBitmapWithBorder: left: " + left);
-        Log.d(TAG, "getBitmapWithBorder: top: " + top);
-
-        Log.d(TAG, "getBitmapWithBorder: cW : " + canvas.getWidth());
-        Log.d(TAG, "getBitmapWithBorder: sW : " + src.getWidth());
-
-        Log.d(TAG, "getBitmapWithBorder: cH: " + canvas.getHeight());
-        Log.d(TAG, "getBitmapWithBorder: sH: " + src.getHeight());
+//        Log.d(TAG, "getBitmapWithBorder: left: " + left);
+//        Log.d(TAG, "getBitmapWithBorder: top: " + top);
+//
+//        Log.d(TAG, "getBitmapWithBorder: cW : " + canvas.getWidth());
+//        Log.d(TAG, "getBitmapWithBorder: sW : " + src.getWidth());
+//
+//        Log.d(TAG, "getBitmapWithBorder: cH: " + canvas.getHeight());
+//        Log.d(TAG, "getBitmapWithBorder: sH: " + src.getHeight());
 
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -151,11 +151,11 @@ public class ImageProcessor extends Post {
         Uri original = getParsedUri();
 
         String outputFileName = FilenameUtils.getBaseName(original.getLastPathSegment()) + "-bordered.jpg";
-        Log.d(TAG, "saveBitmap: " + original.getLastPathSegment());
+//        Log.d(TAG, "saveBitmap: " + original.getLastPathSegment());
 
         String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Planrr/" + outputFileName;
 
-        Log.d(TAG, "saveBitmap: " + path);
+//        Log.d(TAG, "saveBitmap: " + path);
         File imageFile = new File(path);
         File parentFile = imageFile.getParentFile();
         assert parentFile != null;

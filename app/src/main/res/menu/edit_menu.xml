@@ -8,4 +8,10 @@
         android:icon="@drawable/ic_save_black_24dp"
         />
 
+    <item
+        android:id="@+id/batch_process"
+        android:title="Batch process"
+        app:showAsAction="never"
+        />
+
 </menu>

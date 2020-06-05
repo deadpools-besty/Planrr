@@ -1,6 +1,7 @@
 package com.streetxportrait.android.planrr.UI;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -25,10 +26,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.radiobutton.MaterialRadioButton;
+import com.streetxportrait.android.planrr.Model.PhotoList;
+import com.streetxportrait.android.planrr.Model.Post;
 import com.streetxportrait.android.planrr.R;
 import com.streetxportrait.android.planrr.Util.ImageProcessor;
 
@@ -43,6 +48,7 @@ import java.util.Map;
 public class EditFragment extends Fragment {
 
     private static final int PICK_IMAGE = 100;
+    private static final int PICK_IMAGES= 101;
     private static final String TAG = "Edit-Fragment";
     private ImageView imageView;
     private FloatingActionButton floatingActionButton;
@@ -98,6 +104,16 @@ public class EditFragment extends Fragment {
                 Toast.makeText(getContext(), "Photo saved!", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onActivityResult: saved");
                 return true;
+
+            case R.id.batch_process:
+                Intent gallery = new Intent(Intent.ACTION_PICK);
+                gallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                gallery.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                startActivityForResult(gallery, PICK_IMAGES);
+
+
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
 
@@ -145,13 +161,37 @@ public class EditFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE && data != null) {
-            handleImageImport(data.getData());
+            handleSingleImageImport(data.getData());
+        }
 
+        else if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGES && data != null) {
+            ClipData clipData = data.getClipData();
+
+            if (clipData != null) {
+
+                ArrayList<ImageProcessor> photos = new ArrayList<>();
+
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    ClipData.Item item = clipData.getItemAt(i);
+                    ImageProcessor imageProcessor = new ImageProcessor(item.getUri());
+                    photos.add(imageProcessor);
+                }
+                handleMultipleImageImport(photos);
+            }
         }
     }
 
+    private void handleMultipleImageImport(ArrayList<ImageProcessor> photoList) {
+
+        FragmentManager fragmentManager = getParentFragmentManager();
+        BatchProcessDialog batchProcessDialog = BatchProcessDialog.newInstance(photoList);
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        transaction.add(android.R.id.content, batchProcessDialog).addToBackStack(null).commit();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void handleImageImport(Uri uri) {
+    private void handleSingleImageImport(Uri uri) {
 
         cleanFragment();
         Log.d(TAG, "handle image: " + uri);
