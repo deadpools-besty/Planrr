@@ -1,6 +1,7 @@
 package com.streetxportrait.android.planrr.UI;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +60,8 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.Phot
         holder.imageView.setOnClickListener(v -> {
             if (listener != null) {
                 if (position != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(position);
+                    Log.d(TAG, "onBindViewHolder: " + post.getUri());
+                    listener.onItemClick(holder.getAdapterPosition());
                 }
             }
         });
