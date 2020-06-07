@@ -44,8 +44,9 @@ public class BatchProcessDialog extends DialogFragment {
     private static final String TAG = "BatchExportDialog";
     private ListView listView;
     private TextView textView;
-    private ArrayList<ImageProcessor> photoList;
-    private ProcessorAdapter processorAdapter;
+    private ArrayList<ImageProcessor> processorList;
+    private ArrayList<Bitmap> bitmaps;
+    private BitmapAdapter bitmapAdapter;
 
 
     public static BatchProcessDialog newInstance(ArrayList<ImageProcessor> processors) {
@@ -56,6 +57,7 @@ public class BatchProcessDialog extends DialogFragment {
         return fragment;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,7 +68,7 @@ public class BatchProcessDialog extends DialogFragment {
         toolbar.setTitle("Batch Process");
 
         listView = rootView.findViewById(R.id.batch_list_view);
-        textView = rootView.findViewById(R.id.batch_export_prompt);
+//        textView = rootView.findViewById(R.id.batch_export_prompt);
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
@@ -80,9 +82,23 @@ public class BatchProcessDialog extends DialogFragment {
         setHasOptionsMenu(true);
 
         // getting selected images from activity
-        photoList = (ArrayList<ImageProcessor>) getArguments().getSerializable("list");
-        processorAdapter = new ProcessorAdapter(getContext(), photoList);
-        listView.setAdapter(processorAdapter);
+        processorList = (ArrayList<ImageProcessor>) getArguments().getSerializable("list");
+        bitmaps = new ArrayList<>();
+
+        for (ImageProcessor imageProcessor: processorList) {
+
+            try {
+
+                Bitmap ogBitmap = imageProcessor.createBitmap(getContext());
+                bitmaps.add(imageProcessor.getScaledBitmap(imageProcessor.getBitmapWithBorder(Color.WHITE)));
+
+            } catch (IOException e) {
+                Log.d(TAG, "onCreateView: " + e.toString());
+            }
+        }
+
+        bitmapAdapter = new BitmapAdapter(getContext(), bitmaps);
+        listView.setAdapter(bitmapAdapter);
 
         return rootView;
 
@@ -109,8 +125,6 @@ public class BatchProcessDialog extends DialogFragment {
 
         if (id == R.id.batch_process_export) {
 
-
-
             return true;
         }
         else if (id == android.R.id.home) {
@@ -121,35 +135,30 @@ public class BatchProcessDialog extends DialogFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private class ProcessorAdapter extends ArrayAdapter<ImageProcessor> {
+    private class BitmapAdapter extends ArrayAdapter<Bitmap> {
 
-        public ProcessorAdapter(Context context, ArrayList<ImageProcessor> processors) {
-            super(context, 0, processors);
+        public BitmapAdapter(Context context, ArrayList<Bitmap> bitmaps) {
+            super(context, 0, bitmaps);
         }
+
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            ImageProcessor imageProcessor = getItem(position);
+            Bitmap bitmap = getItem(position);
             Log.d(TAG, "getView: called");
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.plan_view_content, parent, false);
             }
             ImageView imageView = convertView.findViewById(R.id.image);
 
-            try {
-                Bitmap originalBitmap = imageProcessor.createBitmap(getContext());
-                Bitmap borderedBitmap = imageProcessor.getBitmapWithBorder(Color.WHITE);
 
-                Glide.with(this.getContext())
-                        .load(imageProcessor.getScaledBitmap(borderedBitmap))
-                        .centerCrop()
-                        .into(imageView);
+            Glide.with(this.getContext())
+                    .load(bitmap)
+                    .centerCrop()
+                    .into(imageView);
 
-            } catch (IOException e) {
-                Log.d(TAG, "getView: " + e.toString());
-            }
 
             return convertView;
         }
