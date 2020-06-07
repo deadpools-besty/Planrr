@@ -1,5 +1,6 @@
 package com.streetxportrait.android.planrr.UI;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
@@ -57,6 +59,12 @@ public class BatchProcessDialog extends DialogFragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NORMAL, R.style.AppTheme_FullScreenDialog);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Nullable
     @Override
@@ -83,6 +91,19 @@ public class BatchProcessDialog extends DialogFragment {
 
         // getting selected images from activity
         processorList = (ArrayList<ImageProcessor>) getArguments().getSerializable("list");
+        generatePreviews();
+
+
+        bitmapAdapter = new BitmapAdapter(getContext(), bitmaps);
+        listView.setAdapter(bitmapAdapter);
+
+        return rootView;
+
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void generatePreviews() {
         bitmaps = new ArrayList<>();
 
         for (ImageProcessor imageProcessor: processorList) {
@@ -96,12 +117,31 @@ public class BatchProcessDialog extends DialogFragment {
                 Log.d(TAG, "onCreateView: " + e.toString());
             }
         }
+    }
 
-        bitmapAdapter = new BitmapAdapter(getContext(), bitmaps);
-        listView.setAdapter(bitmapAdapter);
 
-        return rootView;
+    private void saveImages() {
 
+        int i = 0;
+        for (Bitmap image: bitmaps) {
+
+            try {
+                ImageProcessor.exportBitmap(image, getContext());
+
+            } catch (Exception e) {
+                Log.d(TAG, "saveImages: " + e);
+                i++;
+            }
+        }
+
+        if (i > 0) {
+            Toast.makeText(getContext(), "There was a problem exporting some images", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(getContext(), bitmaps.size() + " images saved!", Toast.LENGTH_SHORT).show();
+
+        }
+        dismiss();
     }
 
     @NonNull
@@ -109,8 +149,22 @@ public class BatchProcessDialog extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
 
         return dialog;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+
+            dialog.getWindow().setLayout(width, height);
+            dialog.getWindow().setWindowAnimations(R.style.DialogAnimation);
+        }
     }
 
     @Override
@@ -124,7 +178,7 @@ public class BatchProcessDialog extends DialogFragment {
         int id = item.getItemId();
 
         if (id == R.id.batch_process_export) {
-
+            saveImages();
             return true;
         }
         else if (id == android.R.id.home) {

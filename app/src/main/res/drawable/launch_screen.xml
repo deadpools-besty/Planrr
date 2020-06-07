@@ -3,6 +3,7 @@
     android:opacity="opaque">
 
     <item android:drawable="@color/colorBackground"
+        android:id="@+id/splash_bg_colour"
         />
 
     <item android:gravity="center"

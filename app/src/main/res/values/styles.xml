@@ -6,9 +6,27 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorAccent">@color/secondaryColor</item>
+
     </style>
 
     <style name="AppTheme.Launcher" >
         <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
     </style>
+
+    <style name="AppTheme.FullScreenDialog" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="colorAccent">@color/secondaryColor</item>
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+
+    </style>
+
+    <style name="DialogAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:windowEnterAnimation">@anim/slide_up_animation</item>
+        <item name="android:windowExitAnimation">@anim/slide_down_anim</item>
+    </style>
+
 </resources>

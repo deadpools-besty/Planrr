@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi;
 import androidx.palette.graphics.Palette;
 
 import com.streetxportrait.android.planrr.Model.Post;
+import com.streetxportrait.android.planrr.R;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -22,10 +23,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
-public class ImageProcessor extends Post {
+public class ImageProcessor extends Post implements Serializable {
 
     private static final String TAG = "Photo";
     private static final int LONG_EDGE_SIZE = 1080;
@@ -144,7 +147,7 @@ public class ImageProcessor extends Post {
         return borderedBitmap;
 
     }
-
+    
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void saveBitmap(Bitmap bitmap, Context context) {
 
@@ -153,7 +156,7 @@ public class ImageProcessor extends Post {
         String outputFileName = FilenameUtils.getBaseName(original.getLastPathSegment()) + "-bordered.jpg";
 //        Log.d(TAG, "saveBitmap: " + original.getLastPathSegment());
 
-        String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Planrr/" + outputFileName;
+        String path = Environment.getExternalStorageDirectory().toString() + context.getString(R.string.planrr_folder) + outputFileName;
 
 //        Log.d(TAG, "saveBitmap: " + path);
         File imageFile = new File(path);
@@ -176,6 +179,37 @@ public class ImageProcessor extends Post {
             Log.d(TAG, "saveBitmap: " + e);
             e.printStackTrace();
         }
+    }
+
+    public static void exportBitmap(Bitmap bitmap, Context context) throws Exception{
+
+        String outputFileName = "planrr-" + UUID.randomUUID().toString() + ".jpg";
+        Log.d(TAG, "exportBitmap: " + outputFileName);
+
+        String path = Environment.getExternalStorageDirectory().toString() + context.getString(R.string.planrr_folder) + outputFileName;
+
+        File imageFile = new File(path);
+        File parentFile = imageFile.getParentFile();
+        assert parentFile != null;
+        if (!parentFile.exists()) {
+            parentFile.mkdir();
+        }
+
+        OutputStream out;
+        try {
+            out = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.flush();
+            out.close();
+
+
+        } catch (IOException e) {
+            Toast.makeText(context, "Save unsuccessful", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "saveBitmap: " + e);
+            e.printStackTrace();
+        }
+
+
     }
 
 

@@ -9,4 +9,5 @@
     <string name="light_theme">Light theme</string>
     <string name="system_default">System Default</string>
     <string name="dark_theme">Dark theme</string>
+    <string name="planrr_folder">/Pictures/Planrr/</string>
 </resources>
